@@ -3,7 +3,7 @@
 
 
 Media Over QUIC                                                 G. Simon
-Internet-Draft                                                 Synamedia
+Internet-Draft                                                   Quortex
 Intended status: Standards Track                                S. Riedl
 Expires: 8 May 2027                                            Paramount
                                                          4 November 2026
@@ -136,8 +136,8 @@ Acknowledgments
 Authors' Addresses
 
    Gwendal Simon
-   Synamedia
-   Email: gsimon@synamedia.com
+   Quortex
+   Email: gwendal.simon@quortex.io
 
 
    Steven Riedl
