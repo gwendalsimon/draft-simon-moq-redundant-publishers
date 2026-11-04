@@ -25,8 +25,8 @@ venue:
 
 author:
   - fullname: Gwendal Simon
-    organization: Synamedia
-    email: gsimon@synamedia.com
+    organization: Quortex
+    email: gwendal.simon@quortex.io
   - fullname: Steven Riedl
     organization: Paramount
     email: steven.riedl@pluto.tv
