@@ -27,6 +27,9 @@ author:
   - fullname: Gwendal Simon
     organization: Synamedia
     email: gsimon@synamedia.com
+  - fullname: Steven Riedl
+    organization: Paramount
+    email: steven.riedl@pluto.tv
 
 normative:
   MOQT: I-D.draft-ietf-moq-transport
