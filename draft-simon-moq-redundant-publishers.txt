@@ -1,0 +1,139 @@
+
+
+
+
+Media Over QUIC                                                 G. Simon
+Internet-Draft                                                 Synamedia
+Intended status: Standards Track                         4 November 2026
+Expires: 8 May 2027
+
+
+                Redundant Publishers for Media over QUIC
+              draft-simon-moq-redundant-publishers-latest
+
+Abstract
+
+   TODO: Abstract, written once the plan is agreed.
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   The latest revision of this draft can be found at
+   https://gwendalsimon.github.io/draft-simon-moq-redundant-publishers/
+   draft-simon-moq-redundant-publishers.html.  Status information for
+   this document may be found at https://datatracker.ietf.org/doc/draft-
+   simon-moq-redundant-publishers/.
+
+   Discussion of this document takes place on the Media Over QUIC
+   Working Group mailing list (mailto:moq@ietf.org), which is archived
+   at https://mailarchive.ietf.org/arch/browse/moq/.  Subscribe at
+   https://www.ietf.org/mailman/listinfo/moq/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 8 May 2027.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+   2.  Conventions and Definitions
+   3.  Security Considerations
+   4.  IANA Considerations
+   5.  References
+     5.1.  Normative References
+     5.2.  Informative References
+   Acknowledgments
+   Author's Address
+
+1.  Introduction
+
+   TODO
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   TODO
+
+3.  Security Considerations
+
+   TODO
+
+4.  IANA Considerations
+
+   TODO
+
+5.  References
+
+5.1.  Normative References
+
+   [MOQT]     Nandakumar, S., Vasiliev, V., Swett, I., and A. Frindell,
+              "Media over QUIC Transport", Work in Progress, Internet-
+              Draft, draft-ietf-moq-transport-23, 2 November 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-moq-
+              transport-23>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+5.2.  Informative References
+
+   [NETFLIX-MHV26]
+              Liu, X., Ummadisetty, R., Lynch, J., and C. Newton,
+              "Intelligent Live Origin and Resilient Streaming", Mile-
+              High Video Conference (MHV '26) , 2026.
+
+   [REAP]     ISO/IEC, "Information technology — Dynamic adaptive
+              streaming over HTTP (DASH) — Part 9: Redundant encoding
+              and packaging for segmented live media (REaP)", 2024.
+
+Acknowledgments
+
+   TODO
+
+Author's Address
+
+   Gwendal Simon
+   Synamedia
+   Email: gsimon@synamedia.com
