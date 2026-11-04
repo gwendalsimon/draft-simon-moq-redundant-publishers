@@ -4,8 +4,9 @@
 
 Media Over QUIC                                                 G. Simon
 Internet-Draft                                                 Synamedia
-Intended status: Standards Track                         4 November 2026
-Expires: 8 May 2027
+Intended status: Standards Track                                S. Riedl
+Expires: 8 May 2027                                            Paramount
+                                                         4 November 2026
 
 
                 Redundant Publishers for Media over QUIC
@@ -74,7 +75,7 @@ Table of Contents
      5.1.  Normative References
      5.2.  Informative References
    Acknowledgments
-   Author's Address
+   Authors' Addresses
 
 1.  Introduction
 
@@ -132,8 +133,13 @@ Acknowledgments
 
    TODO
 
-Author's Address
+Authors' Addresses
 
    Gwendal Simon
    Synamedia
    Email: gsimon@synamedia.com
+
+
+   Steven Riedl
+   Paramount
+   Email: steven.riedl@pluto.tv
