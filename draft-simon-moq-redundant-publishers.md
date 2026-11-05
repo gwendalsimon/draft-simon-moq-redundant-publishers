@@ -67,7 +67,7 @@ TODO
 
 TODO
 
-The relay behaviour in {{relay-behaviour}} uses the following terms:
+The relay behavior in {{relay-behavior}} uses the following terms:
 
 Source:
 : An upstream session over which a relay receives the Track, through a
@@ -94,7 +94,7 @@ TODO
 
 TODO
 
-# Relay Behaviour {#relay-behaviour}
+# Relay Behavior {#relay-behavior}
 
 This section defines how a relay handles a Track that carries the
 REDUNDANT_PUBLISHERS Track Property ({{redundant-publishers}}). The rules apply
@@ -102,7 +102,7 @@ to every relay that has negotiated the Setup Option ({{setup-option}}). Under
 the rules for Mandatory Track Properties in {{MOQT}}, no other relay processes
 or forwards such a Track.
 
-For such a Track, this section replaces two behaviours that {{MOQT}} defines
+For such a Track, this section replaces two behaviors that {{MOQT}} defines
 for a Track with multiple publishers. The first is forwarding Objects from
 every publisher with best-effort deduplication (the Multiple Publishers section
 of {{MOQT}}). The second is treating a duplicate Object with a different
@@ -185,7 +185,7 @@ The binding also governs cache fill. A relay that needs Objects of a bound
 Group that it does not hold requests them only from the source of the Group.
 The need arises when the relay serves a FETCH or fills a gap in a
 subscription. The relay MUST NOT request those Objects from another source,
-even when no other source is available.
+even when the source of the Group is no longer available.
 
 A FETCH for a Group that the relay has not bound binds that Group. The relay
 chooses one source for the Group and requests the Group from that source.
@@ -251,7 +251,7 @@ from the source of the Group.
 ## Endpoints That Neither Cache Nor Forward {#plain-subscribers}
 
 A subscriber that receives the Track over one session and neither caches nor
-forwards it, such as a player, needs no new data-plane behaviour. Every Group
+forwards it, such as a player, needs no new data-plane behavior. Every Group
 that it receives already comes from one Original Publisher. To receive the
 Track at all, the subscriber MUST understand REDUNDANT_PUBLISHERS, so that it
 does not reject the Track under the rules for Mandatory Track Properties in
