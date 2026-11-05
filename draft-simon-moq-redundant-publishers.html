@@ -1165,7 +1165,7 @@ svg {
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-setup-option" class="internal xref">Setup Option</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
-            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-relay-behaviour" class="internal xref">Relay Behaviour</a></p>
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-relay-behavior" class="internal xref">Relay Behavior</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
                 <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-sources-and-bindings" class="internal xref">Sources and Bindings</a></p>
@@ -1240,7 +1240,7 @@ svg {
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
 <p id="section-2-2">TODO<a href="#section-2-2" class="pilcrow">¶</a></p>
-<p id="section-2-3">The relay behaviour in <a href="#relay-behaviour" class="auto internal xref">Section 6</a> uses the following terms:<a href="#section-2-3" class="pilcrow">¶</a></p>
+<p id="section-2-3">The relay behavior in <a href="#relay-behavior" class="auto internal xref">Section 6</a> uses the following terms:<a href="#section-2-3" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-2-4">
         <dt id="section-2-4.1">Source:</dt>
         <dd style="margin-left: 1.5em" id="section-2-4.2">
@@ -1288,17 +1288,17 @@ a bound Group only from that source (<a href="#sources-and-bindings" class="auto
 <p id="section-5-1">TODO<a href="#section-5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="relay-behaviour">
+<div id="relay-behavior">
 <section id="section-6">
-      <h2 id="name-relay-behaviour">
-<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-relay-behaviour" class="section-name selfRef">Relay Behaviour</a>
+      <h2 id="name-relay-behavior">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-relay-behavior" class="section-name selfRef">Relay Behavior</a>
       </h2>
 <p id="section-6-1">This section defines how a relay handles a Track that carries the
 REDUNDANT_PUBLISHERS Track Property (<a href="#redundant-publishers" class="auto internal xref">Section 3</a>). The rules apply
 to every relay that has negotiated the Setup Option (<a href="#setup-option" class="auto internal xref">Section 5</a>). Under
 the rules for Mandatory Track Properties in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>, no other relay processes
 or forwards such a Track.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<p id="section-6-2">For such a Track, this section replaces two behaviours that <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> defines
+<p id="section-6-2">For such a Track, this section replaces two behaviors that <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> defines
 for a Track with multiple publishers. The first is forwarding Objects from
 every publisher with best-effort deduplication (the Multiple Publishers section
 of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>). The second is treating a duplicate Object with a different
@@ -1396,7 +1396,7 @@ sources that it already uses.<a href="#section-6.3-6" class="pilcrow">¶</a></p>
 Group that it does not hold requests them only from the source of the Group.
 The need arises when the relay serves a FETCH or fills a gap in a
 subscription. The relay <span class="bcp14">MUST NOT</span> request those Objects from another source,
-even when no other source is available.<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+even when the source of the Group is no longer available.<a href="#section-6.4-1" class="pilcrow">¶</a></p>
 <p id="section-6.4-2">A FETCH for a Group that the relay has not bound binds that Group. The relay
 chooses one source for the Group and requests the Group from that source.
 When roles are present, the relay prefers the source with the lowest
@@ -1468,7 +1468,7 @@ from the source of the Group.<a href="#section-6.5-6" class="pilcrow">¶</a></p>
 <a href="#section-6.6" class="section-number selfRef">6.6. </a><a href="#name-endpoints-that-neither-cach" class="section-name selfRef">Endpoints That Neither Cache Nor Forward</a>
         </h3>
 <p id="section-6.6-1">A subscriber that receives the Track over one session and neither caches nor
-forwards it, such as a player, needs no new data-plane behaviour. Every Group
+forwards it, such as a player, needs no new data-plane behavior. Every Group
 that it receives already comes from one Original Publisher. To receive the
 Track at all, the subscriber <span class="bcp14">MUST</span> understand REDUNDANT_PUBLISHERS, so that it
 does not reject the Track under the rules for Mandatory Track Properties in
