@@ -1029,7 +1029,7 @@ svg {
   & :is([stroke="white"], [stroke^="#fff"]) {
     stroke: var(--background-color);
   }
-  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+  & :is([fill="black"], [fill^="#000"], :not([fill], [fill] *)) {
     fill: var(--text-color);
   }
   & :is([fill="white"], [fill^="#fff"]) {
@@ -1048,7 +1048,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Simon &amp; Riedl</td>
-<td class="center">Expires 9 May 2027</td>
+<td class="center">Expires 10 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1061,12 +1061,12 @@ svg {
 <dd class="internet-draft">draft-simon-moq-redundant-publishers-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-11-05" class="published">5 November 2026</time>
+<time datetime="2026-11-06" class="published">6 November 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-05-09">9 May 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-10">10 May 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1120,7 +1120,7 @@ svg {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 9 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 10 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1187,6 +1187,9 @@ svg {
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.7">
                 <p id="section-toc.1-1.6.2.7.1"><a href="#section-6.7" class="auto internal xref">6.7</a>.  <a href="#name-failed-and-malformed-source" class="internal xref">Failed and Malformed Sources</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.8">
+                <p id="section-toc.1-1.6.2.8.1"><a href="#section-6.8" class="auto internal xref">6.8</a>.  <a href="#name-end-of-track" class="internal xref">End of Track</a></p>
 </li>
             </ul>
 </li>
@@ -1343,12 +1346,16 @@ source that has delivered an Object of the Group.<a href="#section-6.2-2.2.1" cl
 <p id="section-6.2-3">While it waits, the relay holds the Objects of the Group from every source and
 forwards none of them. The wait adds at most the Selection Timeout to the
 latency of a Group. The wait occurs only when the preferred source is late. A
-relay <span class="bcp14">MAY</span> cap the Selection Timeout that it applies at a local maximum, to
-bound the memory that it spends holding Objects (<a href="#relay-security" class="auto internal xref">Section 7.1</a>).<a href="#section-6.2-3" class="pilcrow">¶</a></p>
-<p id="section-6.2-4">A relay <span class="bcp14">MAY</span> receive the Track from a subset of the available sources, for
-example from the main publisher alone until that publisher fails. The relay
-then trades failover time for upstream bandwidth. The binding rules do not
-change.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+relay <span class="bcp14">MAY</span> bound the Objects that it holds during the wait. A source whose held
+Objects the relay dropped is not eligible for that Group. A relay that bounds
+the Objects it holds keeps the Selection Timeout unchanged.
+<a href="#relay-security" class="auto internal xref">Section 7.1</a> describes a local cap on the timeout and its cost.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+<p id="section-6.2-4">A relay subscribes to every publisher of the Track that it discovers, as
+<span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> requires of a relay. A relay <span class="bcp14">MAY</span> limit the number of sources that it
+holds, with the means that <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> gives a relay for additional publishers.
+The relay <span class="bcp14">SHOULD</span> keep the sources with the lowest PUBLISHER_ROLE. A relay
+cannot select a source that it does not hold. It can fail over to that source
+only after it subscribes to the source and waits for a Group boundary.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="forwarding-and-caching">
@@ -1429,9 +1436,12 @@ outlasts every downstream copy.<a href="#section-6.4-4" class="pilcrow">¶</a></
 binds the next Group afresh. The loss is therefore bounded by the remainder of
 one Group.<a href="#section-6.5-1" class="pilcrow">¶</a></p>
 <p id="section-6.5-2">A Group becomes truncated at a relay when its source ends before delivering
-all of it. The source ends when the session closes or the subscription ends.
-The source also ends when a Subgroup stream is reset and a request to the same
-source cannot recover the missing Objects.<a href="#section-6.5-2" class="pilcrow">¶</a></p>
+all of it. The source ends when the session closes, when the subscription or
+fetch ends, when the relay cancels its requests to the source
+(<a href="#failed-sources" class="auto internal xref">Section 6.7</a>), or when the source signals End of Track
+(<a href="#end-of-track" class="auto internal xref">Section 6.8</a>). A reset of one Subgroup stream by a source that remains
+available does not end the source. The relay <span class="bcp14">MAY</span> request the missing Objects
+from that source. The relay caches the Object states that the source returns.<a href="#section-6.5-2" class="pilcrow">¶</a></p>
 <p id="section-6.5-3">For a truncated Group, the relay takes three actions:<a href="#section-6.5-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-6.5-4.1">
@@ -1445,9 +1455,11 @@ Streams section of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>).<a
 from the source nor knows not to exist. It <span class="bcp14">MAY</span> cache that state.<a href="#section-6.5-4.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-6.5-4.3">
-            <p id="section-6.5-4.3.1">In FETCH responses, the relay serves the Objects that it holds and marks the
+            <p id="section-6.5-4.3.1">The relay records the Gone range up to Location <code>{Group ID, 2^64-1}</code>. In
+FETCH responses, the relay serves the Objects that it holds and marks the
 Objects that it recorded as Gone with End of Gone Range indicators. The last
-indicator ends at Location <code>{Group ID, 2^64-1}</code>.<a href="#section-6.5-4.3.1" class="pilcrow">¶</a></p>
+indicator ends at the End Location of the request when that Location lies
+in the Group. Otherwise it ends at Location <code>{Group ID, 2^64-1}</code>.<a href="#section-6.5-4.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-6.5-5">The second action is an exception to the rule in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> that only the
@@ -1487,11 +1499,40 @@ does (<a href="#sources-and-bindings" class="auto internal xref">Section 6.1</a>
         <h3 id="name-failed-and-malformed-source">
 <a href="#section-6.7" class="section-number selfRef">6.7. </a><a href="#name-failed-and-malformed-source" class="section-name selfRef">Failed and Malformed Sources</a>
         </h3>
-<p id="section-6.7-1">A relay <span class="bcp14">MAY</span> treat a source whose Objects make the Track malformed as a failed
-source, instead of terminating downstream subscriptions. The relay cancels its
-requests to that source. It truncates any Group bound to that source
-(<a href="#truncated-groups" class="auto internal xref">Section 6.5</a>). It continues with the remaining sources. If no source
-remains, the Malformed Track rules in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> apply.<a href="#section-6.7-1" class="pilcrow">¶</a></p>
+<p id="section-6.7-1">A relay <span class="bcp14">MUST</span> treat a source whose Objects make the Track malformed as a failed
+source. It <span class="bcp14">MUST NOT</span> terminate downstream subscriptions on that account while
+another source remains. The relay cancels its requests to that source. It
+truncates any Group bound to that source (<a href="#truncated-groups" class="auto internal xref">Section 6.5</a>). It continues
+with the remaining sources. If no source remains, the Malformed Track rules in
+<span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> apply.<a href="#section-6.7-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="end-of-track">
+<section id="section-6.8">
+        <h3 id="name-end-of-track">
+<a href="#section-6.8" class="section-number selfRef">6.8. </a><a href="#name-end-of-track" class="section-name selfRef">End of Track</a>
+        </h3>
+<p id="section-6.8-1">One source can signal End of Track while another source still delivers later
+Groups, for example when one encoder stops before the other. End of Track
+means that no Object at or after the given Location exists. Does Not Exist is
+permanent and authoritative in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> (the Object States section of
+<span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>).<a href="#section-6.8-1" class="pilcrow">¶</a></p>
+<p id="section-6.8-2">End of Track from a source ends that source. The Track stays established
+downstream while another source remains. The relay binds later Groups to the
+remaining sources as usual. The relay forwards End of Track only when every
+source of the Track has ended. It forwards the largest End of Track Location
+that it received. When every source has ended and no source signaled End of
+Track, the relay truncates a Group in progress (<a href="#truncated-groups" class="auto internal xref">Section 6.5</a>) and ends
+its downstream subscriptions with PUBLISH_DONE and status TRACK_ENDED.<a href="#section-6.8-2" class="pilcrow">¶</a></p>
+<p id="section-6.8-3">A relay <span class="bcp14">MUST NOT</span> forward an End of Track status whose Location is at or below
+an Object of the Track that it has forwarded or cached from any source.
+Forwarding it would mark as not existing an Object that the relay delivered,
+which is a Malformed Track condition in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>. When this rule forbids the
+largest Location, the relay sends no End of Track status. It ends its
+downstream subscriptions with PUBLISH_DONE and status TRACK_ENDED.<a href="#section-6.8-3" class="pilcrow">¶</a></p>
+<p id="section-6.8-4">A publisher <span class="bcp14">SHOULD</span> end the Track at a Group boundary. A backup publisher that
+stops cleanly therefore never ends the Track for the subscribers of the main
+publisher.<a href="#section-6.8-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1509,7 +1550,12 @@ remains, the Malformed Track rules in <span>[<a href="#MOQT" class="cite xref">M
         </h3>
 <p id="section-7.1-1">Holding Objects for the Selection Timeout costs relay memory for every Group
 and every source. A publisher that sets a long timeout raises that cost. A
-relay can therefore cap the timeout that it applies (<a href="#source-selection" class="auto internal xref">Section 6.2</a>).<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+relay bounds the Objects that it holds before it changes the timeout
+(<a href="#source-selection" class="auto internal xref">Section 6.2</a>). A relay under memory pressure <span class="bcp14">MAY</span> cap the Selection
+Timeout that it applies at a local maximum. Such a cap changes which source
+wins at that relay. Relays with different caps can bind the same Group to
+different Original Publishers. The cap is an overload measure outside Source
+Selection.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 <p id="section-7.1-2">A relay cannot tell a divergent copy of a Group from a corrupted or forged
 one. Under this property, the relay does not need to. Authorization is
 unchanged. Every source has to be authorized to publish the Track. Groups from
