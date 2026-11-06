@@ -139,13 +139,17 @@ source. The relay selects the source as follows:
 While it waits, the relay holds the Objects of the Group from every source and
 forwards none of them. The wait adds at most the Selection Timeout to the
 latency of a Group. The wait occurs only when the preferred source is late. A
-relay MAY cap the Selection Timeout that it applies at a local maximum, to
-bound the memory that it spends holding Objects ({{relay-security}}).
+relay MAY bound the Objects that it holds during the wait. A source whose held
+Objects the relay dropped is not eligible for that Group. A relay that bounds
+the Objects it holds keeps the Selection Timeout unchanged.
+{{relay-security}} describes a local cap on the timeout and its cost.
 
-A relay MAY receive the Track from a subset of the available sources, for
-example from the main publisher alone until that publisher fails. The relay
-then trades failover time for upstream bandwidth. The binding rules do not
-change.
+A relay subscribes to every publisher of the Track that it discovers, as
+{{MOQT}} requires of a relay. A relay MAY limit the number of sources that it
+holds, with the means that {{MOQT}} gives a relay for additional publishers.
+The relay SHOULD keep the sources with the lowest PUBLISHER_ROLE. A relay
+cannot select a source that it does not hold. It can fail over to that source
+only after it subscribes to the source and waits for a Group boundary.
 
 ## Forwarding and Caching {#forwarding-and-caching}
 
@@ -218,9 +222,12 @@ binds the next Group afresh. The loss is therefore bounded by the remainder of
 one Group.
 
 A Group becomes truncated at a relay when its source ends before delivering
-all of it. The source ends when the session closes or the subscription ends.
-The source also ends when a Subgroup stream is reset and a request to the same
-source cannot recover the missing Objects.
+all of it. The source ends when the session closes, when the subscription or
+fetch ends, when the relay cancels its requests to the source
+({{failed-sources}}), or when the source signals End of Track
+({{end-of-track}}). A reset of one Subgroup stream by a source that remains
+available does not end the source. The relay MAY request the missing Objects
+from that source. The relay caches the Object states that the source returns.
 
 For a truncated Group, the relay takes three actions:
 
@@ -232,9 +239,11 @@ For a truncated Group, the relay takes three actions:
 * The relay records as Gone the Objects of the Group that it neither received
   from the source nor knows not to exist. It MAY cache that state.
 
-* In FETCH responses, the relay serves the Objects that it holds and marks the
+* The relay records the Gone range up to Location `{Group ID, 2^64-1}`. In
+  FETCH responses, the relay serves the Objects that it holds and marks the
   Objects that it recorded as Gone with End of Gone Range indicators. The last
-  indicator ends at Location `{Group ID, 2^64-1}`.
+  indicator ends at the End Location of the request when that Location lies
+  in the Group. Otherwise it ends at Location `{Group ID, 2^64-1}`.
 
 The second action is an exception to the rule in {{MOQT}} that only the
 Original Publisher originates Gone (the Object States and Relay Fetch Handling
@@ -268,11 +277,39 @@ does ({{sources-and-bindings}} through {{truncated-groups}}).
 
 ## Failed and Malformed Sources {#failed-sources}
 
-A relay MAY treat a source whose Objects make the Track malformed as a failed
-source, instead of terminating downstream subscriptions. The relay cancels its
-requests to that source. It truncates any Group bound to that source
-({{truncated-groups}}). It continues with the remaining sources. If no source
-remains, the Malformed Track rules in {{MOQT}} apply.
+A relay MUST treat a source whose Objects make the Track malformed as a failed
+source. It MUST NOT terminate downstream subscriptions on that account while
+another source remains. The relay cancels its requests to that source. It
+truncates any Group bound to that source ({{truncated-groups}}). It continues
+with the remaining sources. If no source remains, the Malformed Track rules in
+{{MOQT}} apply.
+
+## End of Track {#end-of-track}
+
+One source can signal End of Track while another source still delivers later
+Groups, for example when one encoder stops before the other. End of Track
+means that no Object at or after the given Location exists. Does Not Exist is
+permanent and authoritative in {{MOQT}} (the Object States section of
+{{MOQT}}).
+
+End of Track from a source ends that source. The Track stays established
+downstream while another source remains. The relay binds later Groups to the
+remaining sources as usual. The relay forwards End of Track only when every
+source of the Track has ended. It forwards the largest End of Track Location
+that it received. When every source has ended and no source signaled End of
+Track, the relay truncates a Group in progress ({{truncated-groups}}) and ends
+its downstream subscriptions with PUBLISH_DONE and status TRACK_ENDED.
+
+A relay MUST NOT forward an End of Track status whose Location is at or below
+an Object of the Track that it has forwarded or cached from any source.
+Forwarding it would mark as not existing an Object that the relay delivered,
+which is a Malformed Track condition in {{MOQT}}. When this rule forbids the
+largest Location, the relay sends no End of Track status. It ends its
+downstream subscriptions with PUBLISH_DONE and status TRACK_ENDED.
+
+A publisher SHOULD end the Track at a Group boundary. A backup publisher that
+stops cleanly therefore never ends the Track for the subscribers of the main
+publisher.
 
 # Security Considerations
 
@@ -282,7 +319,12 @@ TODO
 
 Holding Objects for the Selection Timeout costs relay memory for every Group
 and every source. A publisher that sets a long timeout raises that cost. A
-relay can therefore cap the timeout that it applies ({{source-selection}}).
+relay bounds the Objects that it holds before it changes the timeout
+({{source-selection}}). A relay under memory pressure MAY cap the Selection
+Timeout that it applies at a local maximum. Such a cap changes which source
+wins at that relay. Relays with different caps can bind the same Group to
+different Original Publishers. The cap is an overload measure outside Source
+Selection.
 
 A relay cannot tell a divergent copy of a Group from a corrupted or forged
 one. Under this property, the relay does not need to. Authorization is
