@@ -369,6 +369,15 @@ Table of Contents
    truncates a Group in progress (Section 6.5) and ends its downstream
    subscriptions with PUBLISH_DONE and status TRACK_ENDED.
 
+   A source can stay connected without delivering any Object or Object
+   state of the Track.  Under the rule above, such a source keeps the
+   Track open with no time limit.  Therefore, once one source has
+   signaled End of Track, a relay MAY treat another source as ended.
+   The condition is that the relay has received no Object or Object
+   state of the Track from the other source during an idle interval set
+   by the operator of the relay.  The relay then cancels its
+   subscriptions and fetches to the ended source.
+
    A relay MUST NOT forward an End of Track status whose Location is at
    or below an Object of the Track that it has forwarded or cached from
    any source.  Forwarding it would mark as not existing an Object that
@@ -377,9 +386,7 @@ Table of Contents
    of Track status.  It ends its downstream subscriptions with
    PUBLISH_DONE and status TRACK_ENDED.
 
-   A publisher SHOULD end the Track at a Group boundary.  A backup
-   publisher that stops cleanly therefore never ends the Track for the
-   subscribers of the main publisher.
+   A publisher SHOULD end the Track at a Group boundary.
 
 7.  Security Considerations
 

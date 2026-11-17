@@ -1535,15 +1535,20 @@ source of the Track has ended. It forwards the largest End of Track Location
 that it received. When every source has ended and no source signaled End of
 Track, the relay truncates a Group in progress (<a href="#truncated-groups" class="auto internal xref">Section 6.5</a>) and ends
 its downstream subscriptions with PUBLISH_DONE and status TRACK_ENDED.<a href="#section-6.8-2" class="pilcrow">¶</a></p>
-<p id="section-6.8-3">A relay <span class="bcp14">MUST NOT</span> forward an End of Track status whose Location is at or below
+<p id="section-6.8-3">A source can stay connected without delivering any Object or Object state of the
+Track. Under the rule above, such a source keeps the Track open with no time
+limit. Therefore, once one source has signaled End of Track, a relay <span class="bcp14">MAY</span> treat
+another source as ended. The condition is that the relay has received no Object
+or Object state of the Track from the other source during an idle interval set
+by the operator of the relay. The relay then cancels its subscriptions and
+fetches to the ended source.<a href="#section-6.8-3" class="pilcrow">¶</a></p>
+<p id="section-6.8-4">A relay <span class="bcp14">MUST NOT</span> forward an End of Track status whose Location is at or below
 an Object of the Track that it has forwarded or cached from any source.
 Forwarding it would mark as not existing an Object that the relay delivered,
 which is a Malformed Track condition in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>. When this rule forbids the
 largest Location, the relay sends no End of Track status. It ends its
-downstream subscriptions with PUBLISH_DONE and status TRACK_ENDED.<a href="#section-6.8-3" class="pilcrow">¶</a></p>
-<p id="section-6.8-4">A publisher <span class="bcp14">SHOULD</span> end the Track at a Group boundary. A backup publisher that
-stops cleanly therefore never ends the Track for the subscribers of the main
-publisher.<a href="#section-6.8-4" class="pilcrow">¶</a></p>
+downstream subscriptions with PUBLISH_DONE and status TRACK_ENDED.<a href="#section-6.8-4" class="pilcrow">¶</a></p>
+<p id="section-6.8-5">A publisher <span class="bcp14">SHOULD</span> end the Track at a Group boundary.<a href="#section-6.8-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
