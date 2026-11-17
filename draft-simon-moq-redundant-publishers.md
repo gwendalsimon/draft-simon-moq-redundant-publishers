@@ -179,9 +179,21 @@ Location. A relay that resumes other Tracks mid-Group from an equivalent
 upstream when the current upstream fails MUST NOT do so for this Track. The
 relay truncates the Group instead ({{truncated-groups}}).
 
-All sources of the Track MUST send the same Track Properties. A relay SHOULD
-NOT bind a Group to a source whose Track Properties differ from those of the
-sources that it already uses.
+A relay compares the Track Properties of a new source with those of the sources
+that it already uses. The relay makes the comparison when it receives the
+PUBLISH, SUBSCRIBE_OK, or FETCH_OK that establishes the source. A relay MUST
+reject a source whose Track Properties differ. The relay rejects a PUBLISH with
+PUBLISH_ERROR and the error code TRACK_PROPERTY_MISMATCH. It cancels a
+subscription or a fetch. A relay MUST NOT set INCLUDE_PROPERTIES to 0 in a
+request to a source of the Track.
+
+The first source that the relay accepts sets the reference Track Properties.
+The relay keeps that reference while it holds any Object or Object state of
+the Track. Once the relay holds none, the next source that it accepts sets a
+new reference.
+
+A rejected source removes redundancy without any effect that subscribers can
+see. A relay SHOULD report each rejected source to its operator.
 
 ## Cache Fill and FETCH {#filling-and-fetch}
 
