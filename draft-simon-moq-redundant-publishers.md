@@ -105,7 +105,8 @@ The tag identifies one run of an Original Publisher. An Original Publisher
 draws its tag uniformly at random between 0 and 2^32-1 when it starts. An
 Original Publisher that restarts without the state of its previous run MUST
 draw a new tag. An Original Publisher that reconnects with its state keeps its
-tag. Two runs draw the same tag with a probability of 2^-32.
+tag. An Original Publisher uses the same tag in every Track that it publishes
+during one run. Two runs draw the same tag with a probability of 2^-32.
 
 An Original Publisher MUST NOT take its tag from its configuration. A
 configured tag survives a restart. The restarted Original Publisher would then
