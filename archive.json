@@ -1,0 +1,260 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2026-11-17T08:34:52.799310+00:00",
+  "repo": "gwendalsimon/draft-simon-moq-redundant-publishers",
+  "labels": [
+    {
+      "name": "accessibility",
+      "description": "Barrier affecting people with disabilities",
+      "color": "f143ab"
+    },
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [
+    {
+      "number": 2,
+      "id": "I_kwDOViWKH88AAAABcsqB1w",
+      "title": "Binding lifetime: keep state at the relay, or tag each Object with its publisher",
+      "url": "https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/2",
+      "state": "OPEN",
+      "author": "gwendalsimon",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The binding-lifetime rule in Cache Fill and FETCH works. It is one solution to a complicated problem: a downstream relay must never complete a Group with Objects from another Original Publisher. Here is an example with an edge relay E below a mid-tier relay M and encoders A and B:\n\n1. M binds Group 7 to A and forwards Objects 0 to 20 to E.\n2. M evicts Group 7 from its cache.\n3. A subscriber sends a FETCH to ask E for Objects 21 to 59. E requests them from M.\n4. M no longer knows the binding and fetches the Objects from B.\n5. E caches and serves a Group with a head from A and a tail from B.\n\n**Option A: remembered binding (current text).** M keeps the binding for at least MAX_CACHE_DURATION after it last served the Group. A publisher that sets REDUNDANT_PUBLISHERS also sets MAX_CACHE_DURATION. The constraint is that every relay must keep per-Group state, even after the Objects leave the cache. A second question is whether a mandatory MAX_CACHE_DURATION is acceptable, because it caps how long any relay can serve an Object from its cache.\n\n**Option B: a source tag in every Object.** Each Original Publisher sets an Object Property that distinguishes it from the other publishers of the Track. A relay that fills a Group compares the tag of the received Objects with the tag of the Objects it holds. On a mismatch, the relay discards the received Objects and records them as Gone. No relay keeps a binding after its Objects expire. MAX_CACHE_DURATION stays optional. The constraint is that every Object has to carry the tag, because a tail fetched on its own has to be identifiable. The cost is a few bytes per Object.\n\nI lean toward option B. It removes the relay state. It also lets any node, players included, detect a mixed Group.\n\nOption B leaves two points open:\n- The tag value: an operator-assigned small integer (one byte on the wire), or a random value chosen by each publisher (no configuration, up to nine bytes).\n- The tag type: an ordinary Object Property outside the Mandatory Track Property range. MOQT makes a Track malformed when a Mandatory Track Property arrives as an Object Property.\n",
+      "createdAt": "2026-11-05T09:53:56Z",
+      "updatedAt": "2026-11-17T08:30:53Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "riedlse",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'll take option B. Your example is exactly the gap the MAX_CACHE_DURATION rule plugged, and the tag plugs it without relay state and lets a player see a mixed Group, which is the \"promise on the wire\" argument from #2003. Two consequences I like: a binding becomes a binding to a publisher instead of to a session, so an encoder that reconnects can complete its own Group (the current text truncates it), and MAX_CACHE_DURATION goes back to optional.\n\nConditions, so the text stays tight:\n\n1. **Tag value.** A value that no other publisher of the Track uses. A random 62-bit value satisfies that without configuration; an operator MAY assign small integers instead. A few bytes per Object either way.\n2. **Tag type.** An ordinary Object Property outside the Mandatory range, so an endpoint that does not understand it forwards or ignores it. I will check the exact forwarding rule for unknown Object Properties when I write the text.\n3. **Coverage.** Every Object of the Track carries it, including Objects sent as Datagrams and in FETCH responses, because a tail fetched on its own has to identify itself.\n4. **Binding while cached.** The relay still binds a Group while the Group is in its cache: Selection, no mid-Group switch, fill from the bound source. The tag replaces only the binding after eviction. A relay MAY remember the binding longer to fill from the right source directly instead of fetching, comparing, and discarding.\n5. **Gone bound.** The Gone range a relay records keeps a bound: MAX_CACHE_DURATION when the publisher sets it, the relay's own cache policy otherwise. The forgery consideration needs that.\n\nIf you agree I will write the Cache Fill and FETCH text and the Object Property definition against the -23 working copy. This supersedes option (a) from my PR #1 question 3.\n",
+          "createdAt": "2026-11-06T18:07:40Z",
+          "updatedAt": "2026-11-06T18:07:40Z"
+        },
+        {
+          "author": "gwendalsimon",
+          "authorAssociation": "OWNER",
+          "body": "@riedlse I agree with option B and your five conditions, with one change to condition 1. The tag has to identify the encoder instance, and it has to change whenever the encoder loses state. A fixed value assigned by the operator survives a restart. A restarted encoder would then carry the same tag on a different copy of the Group. The tag would no longer detect a mixed Group. A random value drawn at start works. With that change, an encoder that reconnects without losing state can complete its own Group, as you wrote.\n\nPlease go ahead with the Cache Fill and FETCH text and the Object Property definition, as you offered. If it can land by Thursday 19 November, it will be in the public copy.\n\n",
+          "createdAt": "2026-11-17T08:30:53Z",
+          "updatedAt": "2026-11-17T08:30:53Z"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "id": "I_kwDOViWKH88AAAABczb98Q",
+      "title": "Check the Track Properties of a source when the source starts",
+      "url": "https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/3",
+      "state": "OPEN",
+      "author": "gwendalsimon",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The rule in Forwarding and Caching is right on scope and should become a MUST NOT. I agree that it covers all Track Properties (e.g. a diverging VIDEO_CONFIG would break decoding at a Group boundary). The open question is _when_ the relay applies the rule.\n\nA relay receives the Track Properties of a source once, before any Object of that source. MOQT carries them in the message that establishes the source: PUBLISH, SUBSCRIBE_OK, or FETCH_OK. The relay can reject a diverging source before it binds any Group to it. The binding rules then need no mismatch rule.\n\nThe current text (Forwarding and Caching, last paragraph) reads:\n> All sources of the Track MUST send the same Track Properties. A relay SHOULD NOT\n> bind a Group to a source whose Track Properties differ from those of the sources\n> that it already uses.\n\nI propose to replace it with the following text:\n> A relay compares the Track Properties of a new source with those of the sources\n> that it already uses. The relay makes the comparison when it receives the PUBLISH,\n> SUBSCRIBE_OK, or FETCH_OK that establishes the source. A relay MUST reject a source\n> whose Track Properties differ. The relay rejects a PUBLISH with PUBLISH_ERROR. It\n> cancels a subscription or a fetch. A relay MUST NOT set INCLUDE_PROPERTIES to 0 in\n> a request to a source of the Track.\n\nThe last sentence matters because INCLUDE_PROPERTIES set to 0 makes the Track Properties empty.\n\nFour points need a discussion before we change the text:\n1. **PUBLISHER_ROLE.** If PUBLISHER_ROLE is a Track Property, it differs between sources by design. The comparison then has to exclude it. A related question follows: which PUBLISHER_ROLE does a relay forward downstream, given that it receives one per source? MOQT says that the most recent set of Track Properties replaces the cached one. Should PUBLISHER_ROLE be a Track Property at all, or a parameter of PUBLISH and SUBSCRIBE_OK?\n2. **Reference set.** The first source that the relay accepts sets the reference. When the relay subscribes to two sources in parallel, the first answer to arrive wins. After every source has failed, can the next source set a new reference? I'd suggest yes, but only once the relay holds no Object or Object state of the Track.\n3. **Error code.** MOQT has no PUBLISH_ERROR code for this case. Do we define one in the IANA section or reuse an existing code?\n4. **Operator report.** A rejected source silently removes redundancy. Should the draft say that a relay SHOULD report the rejection to its operator, or is that implementation detail?\n\n@riedlse does the admission-time check match what you had in mind? And do you see a Track Property that can legitimately differ between sources, other than PUBLISHER_ROLE?\n",
+      "createdAt": "2026-11-05T17:09:29Z",
+      "updatedAt": "2026-11-06T18:01:31Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "gwendalsimon",
+          "authorAssociation": "OWNER",
+          "body": "Correction on point 1: in my design posted on #2003 (https://github.com/moq-wg/moq-transport/issues/2003#issuecomment-6288962846), PUBLISHER_ROLE is a Message Parameter of PUBLISH and SUBSCRIBE_OK. MOQT does not forward Message Parameters, so each relay sees only the role of its direct peers. The comparison then covers every Track Property without exception, and the question of which role a relay forwards downstream disappears. @riedlse unless you see a reason to make PUBLISHER_ROLE a Track Property, I'd keep it a Message Parameter.\n",
+          "createdAt": "2026-11-06T08:41:19Z",
+          "updatedAt": "2026-11-06T08:49:45Z"
+        },
+        {
+          "author": "riedlse",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes, the admission-time check is what I had in mind, and your text is better than mine: the comparison happens once, when the PUBLISH, SUBSCRIBE_OK, or FETCH_OK that establishes the source arrives, and a rejected source never binds a Group. Take it as written, INCLUDE_PROPERTIES sentence included. On the four points:\n\n1. **PUBLISHER_ROLE.** Agreed, and your correction settles it: it stays a Message Parameter of PUBLISH and SUBSCRIBE_OK, hop-by-hop, so the comparison covers every Track Property with no exclusion. A relay presents none downstream. If we ever want an intermediate relay to present a role to the next hop, that is a separate decision; it matters for #4, where I argue we do not need it.\n2. **Reference set.** Agree. The first accepted source sets it. A new reference only once the relay holds no Object or Object state of the Track, so a cached Group never meets a source with different properties.\n3. **Error code.** Define one, TBD, in IANA Considerations (TRACK_PROPERTY_MISMATCH or similar). The existing PUBLISH_ERROR codes describe other failures, and reusing one hides the cause from the operator.\n4. **Operator report.** One sentence, SHOULD report, in the operational considerations. A silently rejected backup is a loss of redundancy that the operator has to learn about, and the draft is the only place to say so.\n\nTrack Properties that legitimately differ: none in what we run. Everything moq-dev compares on failover today has to match for the next Group to decode. PUBLISHER_ROLE is the only intentional difference, hence point 1.\n",
+          "createdAt": "2026-11-06T18:01:31Z",
+          "updatedAt": "2026-11-06T18:01:31Z"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "id": "I_kwDOViWKH88AAAABc_kQsg",
+      "title": "End of Track when sources end at different Groups",
+      "url": "https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/4",
+      "state": "OPEN",
+      "author": "gwendalsimon",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The draft does not yet say which End of Track a relay accepts when redundant encoders stop on different Groups. In MOQT, End of Track at a Location means that no Object exists at or after that Location. A subscriber that receives an Object past that point treats the Track as malformed.\n\n@riedlse proposed a rule in PR #1 for the case where one source is behind. The first End of Track that the relay accepts from the source of a Group ends the Track at that relay. The relay then discards later Groups from every source. @riedlse also flagged the open case: a Group that the relay already forwarded.\n\nHere is the open case. The relay binds Group 100 to source B and forwards part of it. Source A then signals End of Track at `{100, 0}`. If the relay accepts it, every subscriber that holds Objects of Group 100 sees a malformed Track.\n\nI propose to add two conditions to the rule of @riedlse. The first condition closes the open case. The second condition gives authority to the main publisher, so that relays on disjoint paths end the Track at the same Location when they both receive the main publisher.\n\n> A relay accepts an End of Track from a source only when the following\n> conditions hold:\n>\n> * The relay has bound no Group at or after the Location of that End of Track.\n>\n> * When the sources carry PUBLISHER_ROLE, the source has the lowest\n>   PUBLISHER_ROLE among the sources from which the relay currently receives\n>   the Track.\n>\n> Otherwise, the relay treats the End of Track as the end of that specific\n> source only. The relay does not end the Track. It continues to deliver the\n> Track from its other sources.\n>\n> Once a relay accepts an End of Track, it forwards and caches it. The relay\n> discards the Objects of later Groups from every source. A discarded Object\n> never makes the Track malformed.\n>\n> A relay treats PUBLISH_DONE with TRACK_ENDED from a source as the end of that\n> source. When every source has ended and the relay has accepted no End of Track,\n> the relay truncates any Group in progress (Truncated Groups). The relay\n> then ends its downstream subscriptions with PUBLISH_DONE and TRACK_ENDED.\n\nIn the example, the relay does not accept the End of Track of A. It completes Group 100 from B and accepts the End of Track of B at `{101, 0}`.\n\nTwo points need a discussion:\n\n1. **Tracks without roles.** Without PUBLISHER_ROLE, two relays can end the Track at different Locations, depending on which End of Track arrives first. Each Group still comes from one encoder. Is that acceptable, or should the draft recommend PUBLISHER_ROLE for Tracks that end?\n2. **Placement.** Does the rule belong in Forwarding and Caching, or in its own subsection?\n\n@riedlse, does the first condition match what you had in mind for the forwarded Group?\n",
+      "createdAt": "2026-11-06T10:03:52Z",
+      "updatedAt": "2026-11-17T08:30:54Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "riedlse",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes, your first condition is what I had in mind, and I would state it on Objects: a relay never forwards an End of Track whose Location is at or below an Object it has forwarded or cached from any source. That is the MOQT malformed condition itself. \"Bound no Group at or after\" is equivalent or stricter, since a bound Group can hold Objects the relay has not forwarded yet. Either wording works for me.\n\nOn the rule itself I have moved since PR #1. I would drop \"the first End of Track the relay accepts ends the Track\" and write:\n\n- End of Track from a source ends that source. The Track stays established while another source remains, and later Groups bind to the remaining sources as usual.\n- The relay forwards End of Track only when every source has ended, with the largest Location it received.\n- When the condition above forbids that Location, or no source signaled End of Track, the relay ends its downstream subscriptions with PUBLISH_DONE and TRACK_ENDED and sends no End of Track. That is your last paragraph.\n\nThree reasons.\n\n1. Redundancy exists so that no single publisher can take the Track down. Under the first-accepted rule a clean stop by the main publisher ends the Track for everyone while a healthy backup is still publishing, whether the stop was planned, an operator error, or a compromised encoder. The relay cannot tell those apart. It can tell that Objects exist, and End of Track must not say otherwise. Under the all-sources rule the operator ends the Track the way operators do anyway: by stopping every encoder.\n2. Your point 1 disappears. No role is needed. Two relays with the same set of sources end at the same Location, with or without PUBLISHER_ROLE, and in your example both end at {101, 0}. Relays with different source sets can disagree under any rule.\n3. The second condition only works at the first hop. With PUBLISHER_ROLE hop-by-hop, as in your #2003 design and your correction on #3, a downstream relay sees only whatever role its upstream relay presents, and the draft does not define that. The all-sources rule needs no role at any hop.\n\nThe cost: a backup that keeps publishing after the main publisher stopped cleanly keeps the Track alive. I take that as the operator's intent until the operator stops it, and it is the behavior we want when the clean stop of the main publisher was not intended.\n\nPlacement: its own subsection, End of Track, after Failed and Malformed Sources, because it changes what \"the source ends\" means in Truncated Groups. The text landed with #5, with the other PR #1 leftovers.\n",
+          "createdAt": "2026-11-06T17:58:26Z",
+          "updatedAt": "2026-11-06T17:58:26Z"
+        },
+        {
+          "author": "gwendalsimon",
+          "authorAssociation": "OWNER",
+          "body": "@riedlse I agree with the all-sources rule, and I withdraw my second condition. You are right: PUBLISHER_ROLE is hop-by-hop. Therefore, the condition only works at the first hop.\n\nTwo fixes to the End of Track subsection that you merged in #5:\n\n1. The last sentence (\"A backup publisher that stops cleanly therefore never ends the Track for the subscribers of the main publisher\") comes from the first-accepted rule. Under the all-sources rule, no single publisher ends the Track. Therefore, the sentence no longer follows. I would keep only \"A publisher SHOULD end the Track at a Group boundary.\"\n2. The relay forwards End of Track only when every source has ended. A source that stays connected but stops sending keeps the Track open with no bound. I would add that a relay MAY treat a source as ended when it has received nothing from it for a local timeout.\n\nCould you fold both into a PR by Thursday 19 November?\n",
+          "createdAt": "2026-11-17T08:30:54Z",
+          "updatedAt": "2026-11-17T08:30:54Z"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "id": "I_kwDOViWKH88AAAABdGvzkA",
+      "title": "Answering afrind on moq-wg/moq-transport#2003: public editor's copy and an IETF 127 slot",
+      "url": "https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/6",
+      "state": "OPEN",
+      "author": "riedlse",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Alan asked on moq-wg/moq-transport#2003 for the Mandatory Track Property example. I have a reply drafted (below) that names this draft, summarizes what the relay section settles, and asks the editors one question about the truncated tail (Gone versus a new End of Range flag).\n\nIt commits us to two things I want your view on before it goes:\n\n1. A public editor's copy before IETF 127 (16 to 21 November). Making the repo public is enough.\n2. A few minutes in the MoQ session to present the draft as the MTP example. #2005 removes Mandatory Track Properties at 127 unless an extension shows up, so this is the moment. You present, I present, or both; your call as lead author.\n\nIf you are fine with both I post it Monday. Edits to the text welcome.\n\n---\n\n@afrind Gwendal and I have started it: draft-simon-moq-redundant-publishers, with Gwendal as lead author. The relay-behavior section is in and we are settling the remaining points in the repo's issues. We intend to have the editor's copy public before IETF 127 and would like a few minutes in the MoQ session to present it as the Mandatory Track Property example.\n\nWhat the relay section settles, for anyone following this issue:\n\n- A relay binds each Group of such a Track to one publisher at the Group's first Object. Selection prefers the lowest PUBLISHER_ROLE and waits at most a publisher-set timeout for it, and only when the preferred publisher is late.\n- No mid-Group switch. A relay that loses its upstream mid-Group resumes at the next Group. Cache fill and FETCH come from the bound publisher only.\n- A publisher whose Track Properties differ is refused at admission. A publisher whose Objects make the Track malformed is dropped as a source and the Track continues, which is the behavior this issue asked for, scoped to Tracks that opt in.\n- End of Track from one publisher ends that publisher only.\n- A player only has to recognize the code point and advertise the Setup Option.\n\nOne point touches core text and I would like the editors' view: the tail of a truncated Group. After a mid-Group switch a relay cannot deliver the rest of that Group on its path and does not know whether those Objects exist. Unknown is not cached, so every later FETCH for the tail would go upstream at every tier. We want the relay to record and serve that tail as Gone, which #2022 reserves to the Original Publisher. The alternative is a new End of Range flag defined in our draft with Gone's caching rules. Which would you rather see?\n",
+      "createdAt": "2026-11-06T18:16:27Z",
+      "updatedAt": "2026-11-17T08:30:52Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "gwendalsimon",
+          "authorAssociation": "OWNER",
+          "body": "@riedlse sorry for the late answer.\n\nThe MoQ agenda for IETF 127 is closed, so there is no slot for us. I will not be in San Francisco either. Please discuss the draft off-meeting with anyone interested.\n\nI will make the repository public by Friday 20 November, so that you have a link to share. The editor's copy will be at the `latest` URL of the front matter. Until then, I fill the empty sections (abstract, introduction, code points, IANA) and apply #3. Any point not merged by then gets an open-issue note in the draft, with a link to its issue.\n\nOn your reply to @afrind on #2003: I answered him on moq-transport#2059 (https://github.com/moq-wg/moq-transport/issues/2059#issuecomment-6875299836), where he wrote that Mandatory Track Properties lack a clear use case. Your reply can still go, without the request for a slot. Note that moq-transport#2005 is not the proposal to remove Mandatory Track Properties: it is \"Allow parsing FETCH Objects before FETCH_OK\".\n\n",
+          "createdAt": "2026-11-17T08:30:52Z",
+          "updatedAt": "2026-11-17T08:30:52Z"
+        }
+      ]
+    }
+  ],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOViWKH88AAAABM8vvEQ",
+      "title": "Add the Relay Behaviour section",
+      "url": "https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/pull/1",
+      "state": "MERGED",
+      "author": "riedlse",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The relay-behaviour section I offered on moq-wg/moq-transport#2003, written against the MOQT working copy of 2026-11-02 (the draft-23 changelog), your comments of 10-20 and 11-02, and moq-dev's failover as of 0.17.8. Builds clean with `make`. I followed `docs/WRITING_STYLE.md`.\n\n**What the section says**\n\n- *Sources and Bindings*: a source is one upstream session. A relay binds each Group to one source, so no subscriber ever receives a mixed Group.\n- *Source Selection*: your algorithm, updated for 11-02 (PUBLISHER_ROLE optional, Selection Timeout as a time, relay may cap it).\n- *Forwarding and Caching*: only the bound source's Objects are forwarded or cached. The rest are discarded and never count as Malformed. No mid-Group switch, even when the new source could continue from the same Location.\n- *Cache Fill and FETCH*: gaps are filled only from the bound source. The binding outlives the cache by MAX_CACHE_DURATION, so a downstream relay that still holds part of a Group can never be served the rest from another Original Publisher.\n- *Truncated Groups*: a relay that lost its source mid-Group marks the rest of the Group Gone. This is an exception to moq-transport#2022 (only the Original Publisher originates Gone), and the reason is cacheability: Unknown is not cached, so every later FETCH for the tail would go upstream at every tier with no source able to answer.\n- *Endpoints That Neither Cache Nor Forward*: a player only has to understand the property and advertise the Setup Option, so player stacks can ship it as a no-op ahead of any Track using it.\n- *Failed and Malformed Sources*: a malformed source is dropped, the Track continues (your original ask, scoped to the property).\n- *Security Considerations \u2192 Relay Considerations*: memory cost of the wait, authorization unchanged, per-Object signatures differ per publisher but verify within a Group.\n\n**What I touched outside the section**\n\n- Three definitions (source, binding, truncated Group) under Conventions and Definitions. Your TODO stays.\n- Three empty sections, `REDUNDANT_PUBLISHERS`, `PUBLISHER_ROLE`, `Setup Option`, so that the cross-references resolve. Rename or restructure them freely; only the anchors matter to my text.\n\n**Open questions for you**\n\n1. Source Selection is your algorithm. It may belong with the property definition. Move it if you prefer.\n2. Track Property mismatch. Your 10-20 text makes a differing REDUNDANT_PUBLISHERS value Malformed. My text extends the rule to every Track Property and answers a mismatch by not binding to that source, which is what moq-dev does today (it refuses a failover successor whose timescale, priority, or max age differs). Pick one.\n3. Binding lifetime without MAX_CACHE_DURATION. Without it there is no bound on how long a downstream copy can live, so none on how long a binding has to. Options: (a) a publisher that sets REDUNDANT_PUBLISHERS also sets MAX_CACHE_DURATION, or (b) a per-Group source tag, for example a Subgroup Property if moq-transport#2023 lands. I lean (a): no new wire element.\n4. Truncated tail: Gone (my text) versus Unknown (your 10-20 text). Reasoning above.\n5. End of Track. One source can signal End of Track while another still delivers later Groups (one encoder stops first). Ending only that source breaks every downstream subscriber that already received End of Track. Proposal: the first End of Track that a relay accepts from a Group's source ends the Track at that relay, and the relay discards later Groups from every source. Still needs a rule for a later Group the relay already forwarded. Not in the text yet.\n6. Implementation note. In moq-dev the whole section reduces to skipping the mid-Group takeover on failover for Tracks with the property. Candidate for an Implementation Status section.\n7. Spelling. Your style guide's example is \"Relay Behaviour\", so I used British spelling in the section titles. Say the word if you want American throughout.\n\nDraft PR until you have had a look at the structure.\n",
+      "createdAt": "2026-11-05T00:34:21Z",
+      "updatedAt": "2026-11-05T08:34:39Z",
+      "baseRepository": "gwendalsimon/draft-simon-moq-redundant-publishers",
+      "baseRefName": "main",
+      "baseRefOid": "363511a5df8bc180305aa59f121910aec9c9b978",
+      "headRepository": "gwendalsimon/draft-simon-moq-redundant-publishers",
+      "headRefName": "riedl/relay-behaviour",
+      "headRefOid": "b5eb04a43b167bb548e4a80f1164041ebb2e465e",
+      "closedAt": "2026-11-05T08:34:39Z",
+      "mergedAt": "2026-11-05T08:34:39Z",
+      "mergedBy": "gwendalsimon",
+      "mergeCommit": {
+        "oid": "c95d58f701a8a597947e465ebab45f3ab472999e"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOViWKH88AAAABNXYNAQ",
+      "title": "Relay Behavior: settle five points left open in PR #1",
+      "url": "https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/pull/5",
+      "state": "MERGED",
+      "author": "riedlse",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Follow-up to #1. It settles five of the points I left open there, answers #4, and leaves #2 and #3 to their issues.\n\n**Changed**\n\n- *Source Selection.* A relay subscribes to every publisher it discovers, as MOQT requires, and limits sources only with the means MOQT gives it for additional publishers. The \"subset of sources\" paragraph is gone: a relay that holds only the main publisher cannot select or fail over at the next Group boundary without first subscribing, which costs a whole Group. The memory bound is now on the Objects held during the wait, and a source whose held Objects were dropped is out for that Group. The timeout cap moved to Relay Considerations as an overload measure with its cost stated: relays with different caps bind the same Group to different publishers.\n- *Truncated Groups.* A source ends with its session, its subscription or fetch, a cancellation by the relay, or End of Track. A Subgroup reset by a source that is still available is recovered from that source. This keeps the relay-originated Gone exception as narrow as I promised on moq-wg/moq-transport#2003.\n- *Truncated Groups.* The Gone range is recorded to `{Group ID, 2^64-1}`; the last indicator in a FETCH response is clipped to the request's End Location when that Location lies in the Group.\n- *Failed and Malformed Sources.* MAY becomes MUST: drop the source, keep the Track. As a MAY the fix for #2003 would be optional.\n- *End of Track* (new subsection). End of Track from a source ends that source; the relay forwards End of Track once every source has ended, at the largest Location, and never at or below an Object it already delivered. This reverses my question 5 in #1: ending the Track on the first End of Track would let a backup's clean shutdown end the channel, and it needs the \"already forwarded\" guard anyway. The subsection also states the all-sources-ended case: PUBLISH_DONE with TRACK_ENDED. #4 has the discussion, and this text is my answer there.\n\n**Not in this PR**\n\n- #3 (Track Property check at admission): your text, I agree with it and answered the four points there.\n- #2 (binding lifetime): answered there.\n\nKramdown validated locally; the editor's copy build runs in CI.\n",
+      "createdAt": "2026-11-06T17:25:29Z",
+      "updatedAt": "2026-11-06T17:56:28Z",
+      "baseRepository": "gwendalsimon/draft-simon-moq-redundant-publishers",
+      "baseRefName": "main",
+      "baseRefOid": "0a78bc757b726132e60776d8d3a592874b1bf5bb",
+      "headRepository": "gwendalsimon/draft-simon-moq-redundant-publishers",
+      "headRefName": "riedl/decisions-2026-11-05",
+      "headRefOid": "6bf67f4ed9f1d59f718f7009ee6d9e0d3e264433",
+      "closedAt": "2026-11-06T17:56:28Z",
+      "mergedAt": "2026-11-06T17:56:28Z",
+      "mergedBy": "riedlse",
+      "mergeCommit": {
+        "oid": "ac2a16a76b0161a649f2b8928adfdd168412b193"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 7,
+      "id": "PR_kwDOViWKH88AAAABPxee5g",
+      "title": "Check Track Properties at source admission",
+      "url": "https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/pull/7",
+      "state": "OPEN",
+      "author": "gwendalsimon",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Applies the text agreed in #3. A relay compares the Track Properties of each new source when it starts and rejects a differing source with TRACK_PROPERTY_MISMATCH. The first accepted source sets the reference, and the relay reports each rejection to its operator.\n\nThe IANA entry for the error code follows with the IANA section.\n\nCloses #3.",
+      "createdAt": "2026-11-17T08:33:48Z",
+      "updatedAt": "2026-11-17T08:33:48Z",
+      "baseRepository": "gwendalsimon/draft-simon-moq-redundant-publishers",
+      "baseRefName": "main",
+      "baseRefOid": "ac2a16a76b0161a649f2b8928adfdd168412b193",
+      "headRepository": "gwendalsimon/draft-simon-moq-redundant-publishers",
+      "headRefName": "gwendal/track-properties-admission",
+      "headRefOid": "44173045e0d831c7956f0df97cc8bc90514ca061",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    }
+  ]
+}
