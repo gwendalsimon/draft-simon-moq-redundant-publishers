@@ -312,6 +312,12 @@ that it received. When every source has ended and no source signaled End of
 Track, the relay truncates a Group in progress ({{truncated-groups}}) and ends
 its downstream subscriptions with PUBLISH_DONE and status TRACK_ENDED.
 
+A source that stays connected and sends nothing more would keep the Track
+open without bound. Once a source has signaled End of Track, a relay MAY treat
+another source as ended when the relay has received nothing from that source
+for a local timeout. The relay cancels its requests to a source that it treats
+as ended.
+
 A relay MUST NOT forward an End of Track status whose Location is at or below
 an Object of the Track that it has forwarded or cached from any source.
 Forwarding it would mark as not existing an Object that the relay delivered,
@@ -319,9 +325,7 @@ which is a Malformed Track condition in {{MOQT}}. When this rule forbids the
 largest Location, the relay sends no End of Track status. It ends its
 downstream subscriptions with PUBLISH_DONE and status TRACK_ENDED.
 
-A publisher SHOULD end the Track at a Group boundary. A backup publisher that
-stops cleanly therefore never ends the Track for the subscribers of the main
-publisher.
+A publisher SHOULD end the Track at a Group boundary.
 
 # Security Considerations
 
