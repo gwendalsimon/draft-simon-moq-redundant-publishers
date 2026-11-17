@@ -232,7 +232,27 @@ uses the tag.
 
 # Setup Option {#setup-option}
 
-TODO
+REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD) declares that an endpoint
+supports this document. The Option Type is odd. The value has a length of 0. The
+presence of the option declares support, as the Extension Negotiation section of
+{{MOQT}} allows. The extension is negotiated on a session when both endpoints
+include the option in SETUP.
+
+An endpoint advertising the option supports the REDUNDANT_PUBLISHERS Track
+Property ({{redundant-publishers}}). A relay advertising the option MUST follow
+{{relay-behavior}}, including the use of PUBLISHER_ROLE ({{publisher-role}}).
+
+The Setup Option tells a publisher whether a subscriber supports
+REDUNDANT_PUBLISHERS. On a session without the negotiated extension, a publisher
+MUST reject a SUBSCRIBE or a FETCH for a Track with REDUNDANT_PUBLISHERS with
+the error code UNSUPPORTED_EXTENSION. The publisher MUST NOT send PUBLISH for
+such a Track on that session.
+
+This extension applies to the version of MOQT that {{MOQT}} defines.
+
+Open issue: the Setup Option might list the source selection algorithms that
+an endpoint supports, such as first arrival and role-based selection. See
+https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/11.
 
 # Relay Behavior {#relay-behavior}
 
