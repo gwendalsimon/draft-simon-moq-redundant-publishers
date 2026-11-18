@@ -53,7 +53,15 @@ informative:
 
 --- abstract
 
-TODO: Abstract, written once the plan is agreed.
+Live streaming services run redundant encoders. The copies of a Track from two
+encoders are interchangeable, but they can differ in bytes. Media over QUIC
+Transport (MOQT) treats two different Objects at the same Location as a
+malformed Track. Therefore, a relay that receives both copies ends the Track.
+This document defines REDUNDANT_PUBLISHERS, a Mandatory Track Property by which
+the Original Publishers of a Track declare that their copies can differ. A relay
+that supports the property delivers each Group from one Original Publisher and
+continues the Track when one Original Publisher fails. An optional Object
+Property, PUBLISHER_ROLE, lets a relay prefer a main publisher.
 
 --- middle
 
