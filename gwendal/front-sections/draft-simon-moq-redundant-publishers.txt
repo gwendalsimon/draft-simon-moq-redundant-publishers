@@ -242,7 +242,8 @@ Table of Contents
    operator sets the role of each Original Publisher.  An Original
    Publisher MAY set a different role on a specific Group.  For example,
    an Original Publisher sets a higher role on a Group that it knows to
-   contain encoding artifacts.
+   contain encoding artifacts.  An Original Publisher MUST use the same
+   role in every Object of a Group.
 
    An Original Publisher with a role SHOULD include PUBLISHER_ROLE in
    every Object of the Track with status Normal.  A relay considers an

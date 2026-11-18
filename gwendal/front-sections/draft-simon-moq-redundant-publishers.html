@@ -1402,7 +1402,8 @@ A value of 0 identifies the main publisher. A higher value identifies a backup
 publisher. The operator sets the role of each Original Publisher. An Original
 Publisher <span class="bcp14">MAY</span> set a different role on a specific Group. For example, an Original
 Publisher sets a higher role on a Group that it knows to contain encoding
-artifacts.<a href="#section-5-1" class="pilcrow">¶</a></p>
+artifacts. An Original Publisher <span class="bcp14">MUST</span> use the same role in every Object of a
+Group.<a href="#section-5-1" class="pilcrow">¶</a></p>
 <p id="section-5-2">An Original Publisher with a role <span class="bcp14">SHOULD</span> include PUBLISHER_ROLE in every Object
 of the Track with status Normal. A relay considers an Object without
 PUBLISHER_ROLE, or with a value higher than 127, as an Object with role 127. A
