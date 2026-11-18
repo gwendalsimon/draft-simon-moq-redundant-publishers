@@ -5,8 +5,8 @@
 Media Over QUIC                                                 G. Simon
 Internet-Draft                                                   Quortex
 Intended status: Standards Track                                S. Riedl
-Expires: 21 May 2027                                           Paramount
-                                                        17 November 2026
+Expires: 22 May 2027                                           Paramount
+                                                        18 November 2026
 
 
                 Redundant Publishers for Media over QUIC
@@ -49,7 +49,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 May 2027.
+   This Internet-Draft will expire on 22 May 2027.
 
 Copyright Notice
 
@@ -229,7 +229,10 @@ Table of Contents
    variable-length integer: the role of the Original Publisher of the
    Object.  The role ranges from 0 to 127.  A value of 0 identifies the
    main publisher.  A higher value identifies a backup publisher.  The
-   operator sets the role of each Original Publisher.
+   operator sets the role of each Original Publisher.  An Original
+   Publisher MAY set a different role on a specific Group.  For example,
+   an Original Publisher sets a higher role on a Group that it knows to
+   contain encoding artifacts.
 
    An Original Publisher with a role SHOULD include PUBLISHER_ROLE in
    every Object of the Track with status Normal.  A relay considers an
@@ -239,13 +242,6 @@ Table of Contents
    relay at any hop learns the role of the Original Publisher of each
    Object it receives, including the Objects of a FETCH response.
    Section 7.2 describes how a relay uses the role.
-
-   Open issue: this section follows the proposal of issue #9, still
-   under discussion.  The role can also become a field of the publisher
-   tag of issue #2.  See https://github.com/gwendalsimon/draft-simon-
-   moq-redundant-publishers/issues/9 and
-   https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/
-   issues/2.
 
 6.  Setup Option
 
@@ -267,11 +263,6 @@ Table of Contents
    publisher MUST NOT send PUBLISH for such a Track on that session.
 
    This extension applies to the version of MOQT that [MOQT] defines.
-
-   Open issue: the Setup Option might list the source selection
-   algorithms that an endpoint supports, such as first arrival and role-
-   based selection.  See https://github.com/gwendalsimon/draft-simon-
-   moq-redundant-publishers/issues/11.
 
 7.  Relay Behavior
 
@@ -304,7 +295,7 @@ Table of Contents
 
 7.2.  Source Selection
 
-   A relay binds a Group when the Selection Timeout expires.  The
+   A relay SHOULD bind a Group when the Selection Timeout expires.  The
    timeout starts when the relay receives the first Object of the Group
    from any source.  The role of a source for the Group is the role in
    the first Object of the Group received from that source (Section 5).
@@ -314,10 +305,8 @@ Table of Contents
    the Selection Timeout is 0, the relay binds the Group to the source
    of the first Object, without waiting.
 
-   A relay MAY bind the Group before the Selection Timeout expires when
-   no source can have a lower role, for example on the arrival of an
-   Object with role 0.  The result is the same as at the end of the
-   timeout.
+   A relay MAY bind a Group before the Selection Timeout expires, on a
+   local decision.
 
    While it waits, the relay holds the Objects of the Group from every
    source and forwards none of them.  The wait adds at most the
@@ -335,9 +324,10 @@ Table of Contents
    It can fail over to that source only after it subscribes to the
    source and waits for a Group boundary.
 
-   Open issue: the selection rule follows the proposal of issue #9,
-   still under discussion.  See https://github.com/gwendalsimon/draft-
-   simon-moq-redundant-publishers/issues/9.
+   Open issue: a relay selects a source per Track.  Therefore, a relay
+   can deliver Tracks of one broadcast from different Original
+   Publishers.  See https://github.com/gwendalsimon/draft-simon-moq-
+   redundant-publishers/issues/14.
 
 7.3.  Forwarding and Caching
 
