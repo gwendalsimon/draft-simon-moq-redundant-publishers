@@ -18,13 +18,13 @@
 <!-- Generator version information:
   xml2rfc 3.35.0
     Python 3.14.10
-    ConfigArgParse 1.9.0
+    ConfigArgParse 1.10.1
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.14.3
+    platformdirs 4.14.7
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
@@ -1048,7 +1048,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Simon &amp; Riedl</td>
-<td class="center">Expires 21 May 2027</td>
+<td class="center">Expires 22 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1061,12 +1061,12 @@ svg {
 <dd class="internet-draft">draft-simon-moq-redundant-publishers-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-11-17" class="published">17 November 2026</time>
+<time datetime="2026-11-18" class="published">18 November 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-05-21">21 May 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-22">22 May 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1120,7 +1120,7 @@ svg {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 21 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 22 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1263,8 +1263,9 @@ a bound Group only from that source (<a href="#sources-and-bindings" class="auto
         <dd class="break"></dd>
 <dt id="section-2-4.5">Tag:</dt>
         <dd style="margin-left: 1.5em" id="section-2-4.6">
-          <p id="section-2-4.6.1">The value of PUBLISHER_TAG in an Object (<a href="#publisher-tag" class="auto internal xref">Section 5</a>). The tag
-identifies one run of the Original Publisher of the Object.<a href="#section-2-4.6.1" class="pilcrow">¶</a></p>
+          <p id="section-2-4.6.1">A number that an Original Publisher builds when it starts and includes in
+every Object it publishes (<a href="#publisher-tag" class="auto internal xref">Section 5</a>). Two Objects with the same tag
+come from the same Original Publisher, with no restart between them.<a href="#section-2-4.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-4.7">Truncated Group:</dt>
@@ -1301,23 +1302,21 @@ identifies one run of the Original Publisher of the Object.<a href="#section-2-4
 Property Type is even. Therefore, the value is one variable-length integer:
 the tag of the Original Publisher of the Object. The Property Type is outside
 the range that <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> reserves for Mandatory Track Properties.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<p id="section-5-2">The tag identifies one run of an Original Publisher. An Original Publisher
-draws its tag uniformly at random between 0 and 2^32-1 when it starts. An
-Original Publisher that restarts without the state of its previous run <span class="bcp14">MUST</span>
-draw a new tag. An Original Publisher that reconnects with its state keeps its
-tag. An Original Publisher uses the same tag in every Track that it publishes
-during one run. Two runs draw the same tag with a probability of 2^-32.<a href="#section-5-2" class="pilcrow">¶</a></p>
-<p id="section-5-3">An Original Publisher <span class="bcp14">MUST NOT</span> take its tag from its configuration. A
-configured tag survives a restart. The restarted Original Publisher would then
-send a different copy of a Group under the same tag.<a href="#section-5-3" class="pilcrow">¶</a></p>
-<p id="section-5-4">An Original Publisher <span class="bcp14">MUST</span> include PUBLISHER_TAG in every Object of the Track
+<p id="section-5-2">The tag identifies an Original Publisher between two restarts. The tag has 21
+bits. An Original Publisher builds its tag when it starts. The 16 high bits
+carry the last 16 bits of its start time in milliseconds. The 5 low bits carry a
+random nonce. An Original Publisher that restarts without the state of its
+previous run <span class="bcp14">MUST</span> build a new tag. An Original Publisher that reconnects with
+its state keeps its tag. An Original Publisher uses the same tag in every Track
+that it publishes during one run.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">An Original Publisher <span class="bcp14">MUST</span> include PUBLISHER_TAG in every Object of the Track
 with status Normal, including the Objects that it sends as Datagrams. A relay
 forwards and caches the property unchanged, as <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> requires for Object
 Properties. Therefore, every copy of an Object carries the tag of its Original
 Publisher, including a copy in a FETCH response. A relay <span class="bcp14">MUST</span> treat a source
 that delivers an Object with status Normal and without PUBLISHER_TAG as a
 failed source (<a href="#failed-sources" class="auto internal xref">Section 7.7</a>). <a href="#filling-and-fetch" class="auto internal xref">Section 7.4</a> defines how a relay
-uses the tag.<a href="#section-5-4" class="pilcrow">¶</a></p>
+uses the tag.<a href="#section-5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="setup-option">
@@ -1467,24 +1466,16 @@ remember the source of a Group after the binding ends, so that it binds the
 Group to the same source again.<a href="#section-7.4-3" class="pilcrow">¶</a></p>
 <p id="section-7.4-4">The tag (<a href="#publisher-tag" class="auto internal xref">Section 5</a>) protects a Group after a binding ends upstream.
 All Objects of a Group that a relay holds carry the same tag, because they
-come from one Original Publisher. A relay <span class="bcp14">MUST</span> compare the tag of each Object
+come from one Original Publisher. A relay <span class="bcp14">SHOULD</span> compare the tag of each Object
 that it receives from the source of a Group with the tag of the Objects of
 that Group that it holds. When the tags differ, the relay <span class="bcp14">MUST</span> discard the
 received Object. It neither forwards nor caches that Object. The relay then
 handles the Group as a truncated Group (<a href="#truncated-groups" class="auto internal xref">Section 7.5</a>).<a href="#section-7.4-4" class="pilcrow">¶</a></p>
-<p id="section-7.4-5">For example, suppose a downstream relay holds Objects 0 through 20 of a Group
-and requests the rest from an upstream relay. The upstream relay no longer
-holds the Group, and its binding has ended. The upstream relay binds the Group
-again, to a source that delivers the copy of another Original Publisher. The
-Objects that it returns carry the tag of that Original Publisher. The
-downstream relay discards them and records the rest of the Group as Gone.
-Without the tag, the downstream relay would serve the head of one copy and the
-tail of another copy as one Group.<a href="#section-7.4-5" class="pilcrow">¶</a></p>
-<p id="section-7.4-6"><span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> limits a cached Gone state to MAX_CACHE_DURATION when the Track
+<p id="section-7.4-5"><span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> limits a cached Gone state to MAX_CACHE_DURATION when the Track
 carries that property. When the Track does not carry it, a relay <span class="bcp14">MUST NOT</span> keep
 a Gone state of the Track longer than it keeps the Objects of the Track. Once
 the Objects and the Gone state of a Group expire, a later request can bind the
-Group again and obtain a complete copy.<a href="#section-7.4-6" class="pilcrow">¶</a></p>
+Group again and obtain a complete copy.<a href="#section-7.4-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="truncated-groups">
