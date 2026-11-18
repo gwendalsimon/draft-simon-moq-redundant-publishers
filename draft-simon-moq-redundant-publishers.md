@@ -79,8 +79,9 @@ Binding:
   a bound Group only from that source ({{sources-and-bindings}}).
 
 Tag:
-: The value of PUBLISHER_TAG in an Object ({{publisher-tag}}). The tag
-  identifies one run of the Original Publisher of the Object.
+: A number that an Original Publisher builds when it starts and includes in
+  every Object it publishes ({{publisher-tag}}). Two Objects with the same tag
+  come from the same Original Publisher, with no restart between them.
 
 Truncated Group:
 : A Group whose source ended before delivering all of it
@@ -101,16 +102,13 @@ Property Type is even. Therefore, the value is one variable-length integer:
 the tag of the Original Publisher of the Object. The Property Type is outside
 the range that {{MOQT}} reserves for Mandatory Track Properties.
 
-The tag identifies one run of an Original Publisher. An Original Publisher
-draws its tag uniformly at random between 0 and 2^32-1 when it starts. An
-Original Publisher that restarts without the state of its previous run MUST
-draw a new tag. An Original Publisher that reconnects with its state keeps its
-tag. An Original Publisher uses the same tag in every Track that it publishes
-during one run. Two runs draw the same tag with a probability of 2^-32.
-
-An Original Publisher MUST NOT take its tag from its configuration. A
-configured tag survives a restart. The restarted Original Publisher would then
-send a different copy of a Group under the same tag.
+The tag identifies an Original Publisher between two restarts. The tag has 21
+bits. An Original Publisher builds its tag when it starts. The 16 high bits
+carry the last 16 bits of its start time in milliseconds. The 5 low bits carry a
+random nonce. An Original Publisher that restarts without the state of its
+previous run MUST build a new tag. An Original Publisher that reconnects with
+its state keeps its tag. An Original Publisher uses the same tag in every Track
+that it publishes during one run.
 
 An Original Publisher MUST include PUBLISHER_TAG in every Object of the Track
 with status Normal, including the Objects that it sends as Datagrams. A relay
@@ -251,20 +249,11 @@ Group to the same source again.
 
 The tag ({{publisher-tag}}) protects a Group after a binding ends upstream.
 All Objects of a Group that a relay holds carry the same tag, because they
-come from one Original Publisher. A relay MUST compare the tag of each Object
+come from one Original Publisher. A relay SHOULD compare the tag of each Object
 that it receives from the source of a Group with the tag of the Objects of
 that Group that it holds. When the tags differ, the relay MUST discard the
 received Object. It neither forwards nor caches that Object. The relay then
 handles the Group as a truncated Group ({{truncated-groups}}).
-
-For example, suppose a downstream relay holds Objects 0 through 20 of a Group
-and requests the rest from an upstream relay. The upstream relay no longer
-holds the Group, and its binding has ended. The upstream relay binds the Group
-again, to a source that delivers the copy of another Original Publisher. The
-Objects that it returns carry the tag of that Original Publisher. The
-downstream relay discards them and records the rest of the Group as Gone.
-Without the tag, the downstream relay would serve the head of one copy and the
-tail of another copy as one Group.
 
 {{MOQT}} limits a cached Gone state to MAX_CACHE_DURATION when the Track
 carries that property. When the Track does not carry it, a relay MUST NOT keep
