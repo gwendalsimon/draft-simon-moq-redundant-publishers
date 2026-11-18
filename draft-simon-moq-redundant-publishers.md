@@ -165,7 +165,7 @@ advertising the Setup Option ({{plain-subscribers}}).
 
 # REDUNDANT_PUBLISHERS {#redundant-publishers}
 
-REDUNDANT_PUBLISHERS (Property Type TBD) is a Mandatory Track Property
+REDUNDANT_PUBLISHERS (Property Type TBD1) is a Mandatory Track Property
 ({{MOQT}}). With this property, an Original Publisher declares that other
 Original Publishers can publish the same Track. Their copies of a Group MAY
 differ.
@@ -187,7 +187,7 @@ Property handles the Track. A relay supporting REDUNDANT_PUBLISHERS follows
 
 # PUBLISHER_ROLE {#publisher-role}
 
-PUBLISHER_ROLE (Property Type TBD) is an optional Object Property ({{MOQT}}).
+PUBLISHER_ROLE (Property Type TBD2) is an optional Object Property ({{MOQT}}).
 The Property Type is even. Therefore, the value is one variable-length integer:
 the role of the Original Publisher of the Object. The role ranges from 0 to 127.
 A value of 0 identifies the main publisher. A higher value identifies a backup
@@ -230,7 +230,7 @@ uses the tag.
 
 # Setup Option {#setup-option}
 
-REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD) declares that an endpoint
+REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD3) declares that an endpoint
 supports this document. The Option Type is odd. The value has a length of 0. The
 presence of the option declares support, as the Extension Negotiation section of
 {{MOQT}} allows. The extension is negotiated on a session when both endpoints
@@ -538,7 +538,31 @@ covers at most the rest of one Group. Every Gone state of the Track expires as
 
 # IANA Considerations
 
-TODO
+This document registers four codepoints in the registries of {{MOQT}}.
+
+This document registers two entries in the "MOQ Properties" registry:
+
+| Type | Name                 | Scope  | Specification            |
+|-----:|:---------------------|:-------|:-------------------------|
+| TBD1 | REDUNDANT_PUBLISHERS | Track  | {{redundant-publishers}} |
+| TBD2 | PUBLISHER_ROLE       | Object | {{publisher-role}}       |
+
+TBD1 is an even value in the range of Mandatory Track Properties, 0x4000 to
+0x7FFF. TBD2 is an even value.
+
+This document registers one entry in the "Setup Options" registry:
+
+| Type | Name                           | Specification    |
+|-----:|:-------------------------------|:-----------------|
+| TBD3 | REDUNDANT_PUBLISHERS_SUPPORTED | {{setup-option}} |
+
+TBD3 is an odd value.
+
+This document registers one entry in the "REQUEST_ERROR Codes" registry:
+
+| Name                    | Code | Specification              |
+|:------------------------|:----:|:---------------------------|
+| TRACK_PROPERTY_MISMATCH | TBD4 | {{forwarding-and-caching}} |
 
 --- back
 
