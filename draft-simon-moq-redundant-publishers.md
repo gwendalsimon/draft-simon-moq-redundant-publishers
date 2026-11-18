@@ -191,7 +191,10 @@ PUBLISHER_ROLE (Property Type TBD) is an optional Object Property ({{MOQT}}).
 The Property Type is even. Therefore, the value is one variable-length integer:
 the role of the Original Publisher of the Object. The role ranges from 0 to 127.
 A value of 0 identifies the main publisher. A higher value identifies a backup
-publisher. The operator sets the role of each Original Publisher.
+publisher. The operator sets the role of each Original Publisher. An Original
+Publisher MAY set a different role on a specific Group. For example, an Original
+Publisher sets a higher role on a Group that it knows to contain encoding
+artifacts.
 
 An Original Publisher with a role SHOULD include PUBLISHER_ROLE in every Object
 of the Track with status Normal. A relay considers an Object without
@@ -200,11 +203,6 @@ relay forwards and caches the property unchanged, as {{MOQT}} requires for
 Object Properties. Therefore, a relay at any hop learns the role of the Original
 Publisher of each Object it receives, including the Objects of a FETCH response.
 {{source-selection}} describes how a relay uses the role.
-
-Open issue: this section follows the proposal of issue #9, still under
-discussion. The role can also become a field of the publisher tag of issue #2.
-See https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/9
-and https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/2.
 
 # PUBLISHER_TAG {#publisher-tag}
 
@@ -250,10 +248,6 @@ such a Track on that session.
 
 This extension applies to the version of MOQT that {{MOQT}} defines.
 
-Open issue: the Setup Option might list the source selection algorithms that
-an endpoint supports, such as first arrival and role-based selection. See
-https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/11.
-
 # Relay Behavior {#relay-behavior}
 
 This section defines how a relay handles a Track that carries the
@@ -282,18 +276,17 @@ Original Publisher. The same holds for every copy downstream of the relay.
 
 ## Source Selection {#source-selection}
 
-A relay binds a Group when the Selection Timeout expires. The timeout starts
-when the relay receives the first Object of the Group from any source. The role
-of a source for the Group is the role in the first Object of the Group received
-from that source ({{publisher-role}}). The relay binds the Group to the source
-with the lowest role. When several sources have the lowest role, the relay binds
-the Group to the source whose first Object of the Group arrived earliest. When
-the Selection Timeout is 0, the relay binds the Group to the source of the first
-Object, without waiting.
+A relay SHOULD bind a Group when the Selection Timeout expires. The timeout
+starts when the relay receives the first Object of the Group from any source.
+The role of a source for the Group is the role in the first Object of the Group
+received from that source ({{publisher-role}}). The relay binds the Group to the
+source with the lowest role. When several sources have the lowest role, the
+relay binds the Group to the source whose first Object of the Group arrived
+earliest. When the Selection Timeout is 0, the relay binds the Group to the
+source of the first Object, without waiting.
 
-A relay MAY bind the Group before the Selection Timeout expires when no source
-can have a lower role, for example on the arrival of an Object with role 0. The
-result is the same as at the end of the timeout.
+A relay MAY bind a Group before the Selection Timeout expires, on a local
+decision.
 
 While it waits, the relay holds the Objects of the Group from every source and
 forwards none of them. The wait adds at most the Selection Timeout to the
@@ -309,9 +302,9 @@ The relay SHOULD keep the sources with the lowest role. A relay
 cannot select a source that it does not hold. It can fail over to that source
 only after it subscribes to the source and waits for a Group boundary.
 
-Open issue: the selection rule follows the proposal of issue #9, still under
-discussion. See
-https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/9.
+Open issue: a relay selects a source per Track. Therefore, a relay can deliver
+Tracks of one broadcast from different Original Publishers. See
+https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/14.
 
 ## Forwarding and Caching {#forwarding-and-caching}
 
