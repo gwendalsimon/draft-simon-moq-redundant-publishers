@@ -78,6 +78,11 @@ Binding:
 : The association of one Group of the Track with one source. A relay delivers
   a bound Group only from that source ({{sources-and-bindings}}).
 
+Tag:
+: A number that an Original Publisher builds when it starts and includes in
+  every Object it publishes ({{publisher-tag}}). Two Objects with the same tag
+  come from the same Original Publisher, with no restart between them.
+
 Truncated Group:
 : A Group whose source ended before delivering all of it
   ({{truncated-groups}}).
@@ -89,6 +94,30 @@ TODO
 # PUBLISHER_ROLE {#publisher-role}
 
 TODO
+
+# PUBLISHER_TAG {#publisher-tag}
+
+PUBLISHER_TAG (Property Type TBD) is an Object Property ({{MOQT}}). The
+Property Type is even. Therefore, the value is one variable-length integer:
+the tag of the Original Publisher of the Object. The Property Type is outside
+the range that {{MOQT}} reserves for Mandatory Track Properties.
+
+The tag identifies an Original Publisher between two restarts. The tag has 21
+bits. An Original Publisher builds its tag when it starts. The 16 high bits
+carry the last 16 bits of its start time in milliseconds. The 5 low bits carry a
+random nonce. An Original Publisher that restarts without the state of its
+previous run MUST build a new tag. An Original Publisher that reconnects with
+its state keeps its tag. An Original Publisher uses the same tag in every Track
+that it publishes during one run.
+
+An Original Publisher MUST include PUBLISHER_TAG in every Object of the Track
+with status Normal, including the Objects that it sends as Datagrams. A relay
+forwards and caches the property unchanged, as {{MOQT}} requires for Object
+Properties. Therefore, every copy of an Object carries the tag of its Original
+Publisher, including a copy in a FETCH response. A relay MUST treat a source
+that delivers an Object with status Normal and without PUBLISHER_TAG as a
+failed source ({{failed-sources}}). {{filling-and-fetch}} defines how a relay
+uses the tag.
 
 # Setup Option {#setup-option}
 
@@ -213,19 +242,24 @@ while delivering Group 3. Groups 1 and 2 stay bound to that source. Group 3 is
 truncated. The relay can request Groups 4 and 5 from another source.
 
 A relay keeps the binding of a Group while it holds any Object or Object state
-of the Group. The relay also keeps the binding for at least MAX_CACHE_DURATION
-({{MOQT}}) after it last forwarded or served any Object of the Group. The
-binding therefore outlives the Objects themselves. After that period, a later
-request MAY bind the Group again, possibly to a different source.
+of the Group. Once the relay holds none, the binding ends. A later request MAY
+then bind the Group again, possibly to a different source. A relay MAY
+remember the source of a Group after the binding ends, so that it binds the
+Group to the same source again.
 
-Keeping the binding after the Objects expire closes a gap. Suppose a
-downstream relay still holds part of a Group and requests the rest. Without
-the kept binding, the upstream relay could serve the rest from another
-Original Publisher and mix two copies in one Group. With the kept binding, the
-upstream relay serves the rest from the same source. If that source is gone,
-the upstream relay marks the rest Gone ({{truncated-groups}}). Each relay
-restarts the period each time it serves the Group. The binding therefore
-outlasts every downstream copy.
+The tag ({{publisher-tag}}) protects a Group after a binding ends upstream.
+All Objects of a Group that a relay holds carry the same tag, because they
+come from one Original Publisher. A relay SHOULD compare the tag of each Object
+that it receives from the source of a Group with the tag of the Objects of
+that Group that it holds. When the tags differ, the relay MUST discard the
+received Object. It neither forwards nor caches that Object. The relay then
+handles the Group as a truncated Group ({{truncated-groups}}).
+
+{{MOQT}} limits a cached Gone state to MAX_CACHE_DURATION when the Track
+carries that property. When the Track does not carry it, a relay MUST NOT keep
+a Gone state of the Track longer than it keeps the Objects of the Track. Once
+the Objects and the Gone state of a Group expire, a later request can bind the
+Group again and obtain a complete copy.
 
 ## Truncated Groups {#truncated-groups}
 
@@ -278,7 +312,9 @@ Track at all, the subscriber MUST understand REDUNDANT_PUBLISHERS, so that it
 does not reject the Track under the rules for Mandatory Track Properties in
 {{MOQT}}. The subscriber MUST advertise the Setup Option ({{setup-option}}).
 It ignores the Selection Timeout and PUBLISHER_ROLE. It handles a truncated
-Group as it handles any Group whose Subgroup streams were reset.
+Group as it handles any Group whose Subgroup streams were reset. It MAY
+compare the tags of the Objects of a Group ({{publisher-tag}}) to detect a
+Group that mixes two copies.
 
 These two requirements let player implementations add support before any
 Track uses the property, at no cost.
@@ -354,6 +390,19 @@ Copies of a Group from different Original Publishers differ. Per-Object
 signatures, for example in Immutable Properties ({{MOQT}}), therefore differ
 between Groups. A verifier has to accept the key of each publisher.
 Verification within a Group still works, because no Group is ever mixed.
+
+The tag ({{publisher-tag}}) is not a credential. An authorized Original
+Publisher can send the tag of another Original Publisher. A relay cannot
+detect the copied tag. A Group can then mix two copies. The tag protects a
+Group against the loss of a binding ({{filling-and-fetch}}). It does not
+authenticate an Original Publisher.
+
+A relay originates Gone under {{truncated-groups}} and {{filling-and-fetch}}.
+A subscriber cannot tell that state from Gone signaled by an Original
+Publisher. A faulty relay can therefore hide Objects that another Original
+Publisher still holds. The Gone state of a relay that follows this document
+covers at most the rest of one Group. Every Gone state of the Track expires as
+{{filling-and-fetch}} requires.
 
 # IANA Considerations
 
