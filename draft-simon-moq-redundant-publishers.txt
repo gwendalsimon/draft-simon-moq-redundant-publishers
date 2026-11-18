@@ -5,8 +5,8 @@
 Media Over QUIC                                                 G. Simon
 Internet-Draft                                                   Quortex
 Intended status: Standards Track                                S. Riedl
-Expires: 21 May 2027                                           Paramount
-                                                        17 November 2026
+Expires: 22 May 2027                                           Paramount
+                                                        18 November 2026
 
 
                 Redundant Publishers for Media over QUIC
@@ -49,7 +49,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 May 2027.
+   This Internet-Draft will expire on 22 May 2027.
 
 Copyright Notice
 
@@ -71,22 +71,23 @@ Table of Contents
    2.  Conventions and Definitions
    3.  REDUNDANT_PUBLISHERS
    4.  PUBLISHER_ROLE
-   5.  Setup Option
-   6.  Relay Behavior
-     6.1.  Sources and Bindings
-     6.2.  Source Selection
-     6.3.  Forwarding and Caching
-     6.4.  Cache Fill and FETCH
-     6.5.  Truncated Groups
-     6.6.  Endpoints That Neither Cache Nor Forward
-     6.7.  Failed and Malformed Sources
-     6.8.  End of Track
-   7.  Security Considerations
-     7.1.  Relay Considerations
-   8.  IANA Considerations
-   9.  References
-     9.1.  Normative References
-     9.2.  Informative References
+   5.  PUBLISHER_TAG
+   6.  Setup Option
+   7.  Relay Behavior
+     7.1.  Sources and Bindings
+     7.2.  Source Selection
+     7.3.  Forwarding and Caching
+     7.4.  Cache Fill and FETCH
+     7.5.  Truncated Groups
+     7.6.  Endpoints That Neither Cache Nor Forward
+     7.7.  Failed and Malformed Sources
+     7.8.  End of Track
+   8.  Security Considerations
+     8.1.  Relay Considerations
+   9.  IANA Considerations
+   10. References
+     10.1.  Normative References
+     10.2.  Informative References
    Acknowledgments
    Authors' Addresses
 
@@ -104,7 +105,7 @@ Table of Contents
 
    TODO
 
-   The relay behavior in Section 6 uses the following terms:
+   The relay behavior in Section 7 uses the following terms:
 
    Source:  An upstream session over which a relay receives the Track,
       through a subscription, a PUBLISH, or a FETCH.  Each session is a
@@ -113,10 +114,15 @@ Table of Contents
 
    Binding:  The association of one Group of the Track with one source.
       A relay delivers a bound Group only from that source
-      (Section 6.1).
+      (Section 7.1).
+
+   Tag:  A number that an Original Publisher builds when it starts and
+      includes in every Object it publishes (Section 5).  Two Objects
+      with the same tag come from the same Original Publisher, with no
+      restart between them.
 
    Truncated Group:  A Group whose source ended before delivering all of
-      it (Section 6.5).
+      it (Section 7.5).
 
 3.  REDUNDANT_PUBLISHERS
 
@@ -126,15 +132,41 @@ Table of Contents
 
    TODO
 
-5.  Setup Option
+5.  PUBLISHER_TAG
+
+   PUBLISHER_TAG (Property Type TBD) is an Object Property ([MOQT]).
+   The Property Type is even.  Therefore, the value is one variable-
+   length integer: the tag of the Original Publisher of the Object.  The
+   Property Type is outside the range that [MOQT] reserves for Mandatory
+   Track Properties.
+
+   The tag identifies an Original Publisher between two restarts.  The
+   tag has 21 bits.  An Original Publisher builds its tag when it
+   starts.  The 16 high bits carry the last 16 bits of its start time in
+   milliseconds.  The 5 low bits carry a random nonce.  An Original
+   Publisher that restarts without the state of its previous run MUST
+   build a new tag.  An Original Publisher that reconnects with its
+   state keeps its tag.  An Original Publisher uses the same tag in
+   every Track that it publishes during one run.
+
+   An Original Publisher MUST include PUBLISHER_TAG in every Object of
+   the Track with status Normal, including the Objects that it sends as
+   Datagrams.  A relay forwards and caches the property unchanged, as
+   [MOQT] requires for Object Properties.  Therefore, every copy of an
+   Object carries the tag of its Original Publisher, including a copy in
+   a FETCH response.  A relay MUST treat a source that delivers an
+   Object with status Normal and without PUBLISHER_TAG as a failed
+   source (Section 7.7).  Section 7.4 defines how a relay uses the tag.
+
+6.  Setup Option
 
    TODO
 
-6.  Relay Behavior
+7.  Relay Behavior
 
    This section defines how a relay handles a Track that carries the
    REDUNDANT_PUBLISHERS Track Property (Section 3).  The rules apply to
-   every relay that has negotiated the Setup Option (Section 5).  Under
+   every relay that has negotiated the Setup Option (Section 6).  Under
    the rules for Mandatory Track Properties in [MOQT], no other relay
    processes or forwards such a Track.
 
@@ -146,11 +178,11 @@ Table of Contents
    Malformed Track (the Caching Relays and Malformed Tracks sections of
    [MOQT]).  The rest of [MOQT] applies unchanged.
 
-6.1.  Sources and Bindings
+7.1.  Sources and Bindings
 
    A relay binds each Group of the Track to exactly one source.  The
    relay delivers that Group only from that source.  A binding never
-   changes while it lasts.  Section 6.4 defines how long a binding
+   changes while it lasts.  Section 7.4 defines how long a binding
    lasts.
 
    The binding rules hold end to end because every relay that processes
@@ -159,7 +191,7 @@ Table of Contents
    therefore also comes from one Original Publisher.  The same holds for
    every copy downstream of the relay.
 
-6.2.  Source Selection
+7.2.  Source Selection
 
    A relay binds a Group when it first receives an Object of that Group
    from any source.  The relay selects the source as follows:
@@ -182,7 +214,7 @@ Table of Contents
    when the preferred source is late.  A relay MAY bound the Objects
    that it holds during the wait.  A source whose held Objects the relay
    dropped is not eligible for that Group.  A relay that bounds the
-   Objects it holds keeps the Selection Timeout unchanged.  Section 7.1
+   Objects it holds keeps the Selection Timeout unchanged.  Section 8.1
    describes a local cap on the timeout and its cost.
 
    A relay subscribes to every publisher of the Track that it discovers,
@@ -193,7 +225,7 @@ Table of Contents
    not hold.  It can fail over to that source only after it subscribes
    to the source and waits for a Group boundary.
 
-6.3.  Forwarding and Caching
+7.3.  Forwarding and Caching
 
    Once a Group is bound, the relay handles the Objects of that Group as
    follows:
@@ -222,7 +254,7 @@ Table of Contents
    from the same Location.  A relay that resumes other Tracks mid-Group
    from an equivalent upstream when the current upstream fails MUST NOT
    do so for this Track.  The relay truncates the Group instead
-   (Section 6.5).
+   (Section 7.5).
 
    A relay compares the Track Properties of a new source with those of
    the sources that it already uses.  The relay makes the comparison
@@ -242,7 +274,7 @@ Table of Contents
    subscribers can see.  A relay SHOULD report each rejected source to
    its operator.
 
-6.4.  Cache Fill and FETCH
+7.4.  Cache Fill and FETCH
 
    The binding also governs cache fill.  A relay that needs Objects of a
    bound Group that it does not hold requests them only from the source
@@ -262,23 +294,29 @@ Table of Contents
    relay can request Groups 4 and 5 from another source.
 
    A relay keeps the binding of a Group while it holds any Object or
-   Object state of the Group.  The relay also keeps the binding for at
-   least MAX_CACHE_DURATION ([MOQT]) after it last forwarded or served
-   any Object of the Group.  The binding therefore outlives the Objects
-   themselves.  After that period, a later request MAY bind the Group
-   again, possibly to a different source.
+   Object state of the Group.  Once the relay holds none, the binding
+   ends.  A later request MAY then bind the Group again, possibly to a
+   different source.  A relay MAY remember the source of a Group after
+   the binding ends, so that it binds the Group to the same source
+   again.
 
-   Keeping the binding after the Objects expire closes a gap.  Suppose a
-   downstream relay still holds part of a Group and requests the rest.
-   Without the kept binding, the upstream relay could serve the rest
-   from another Original Publisher and mix two copies in one Group.
-   With the kept binding, the upstream relay serves the rest from the
-   same source.  If that source is gone, the upstream relay marks the
-   rest Gone (Section 6.5).  Each relay restarts the period each time it
-   serves the Group.  The binding therefore outlasts every downstream
-   copy.
+   The tag (Section 5) protects a Group after a binding ends upstream.
+   All Objects of a Group that a relay holds carry the same tag, because
+   they come from one Original Publisher.  A relay SHOULD compare the
+   tag of each Object that it receives from the source of a Group with
+   the tag of the Objects of that Group that it holds.  When the tags
+   differ, the relay MUST discard the received Object.  It neither
+   forwards nor caches that Object.  The relay then handles the Group as
+   a truncated Group (Section 7.5).
 
-6.5.  Truncated Groups
+   [MOQT] limits a cached Gone state to MAX_CACHE_DURATION when the
+   Track carries that property.  When the Track does not carry it, a
+   relay MUST NOT keep a Gone state of the Track longer than it keeps
+   the Objects of the Track.  Once the Objects and the Gone state of a
+   Group expire, a later request can bind the Group again and obtain a
+   complete copy.
+
+7.5.  Truncated Groups
 
    A relay does not complete a truncated Group from another source.  The
    relay binds the next Group afresh.  The loss is therefore bounded by
@@ -287,8 +325,8 @@ Table of Contents
    A Group becomes truncated at a relay when its source ends before
    delivering all of it.  The source ends when the session closes, when
    the subscription or fetch ends, when the relay cancels its requests
-   to the source (Section 6.7), or when the source signals End of Track
-   (Section 6.8).  A reset of one Subgroup stream by a source that
+   to the source (Section 7.7), or when the source signals End of Track
+   (Section 7.8).  A reset of one Subgroup stream by a source that
    remains available does not end the source.  The relay MAY request the
    missing Objects from that source.  The relay caches the Object states
    that the source returns.
@@ -321,10 +359,10 @@ Table of Contents
    the state and does not request those Objects again.
 
    A relay that has recorded part of a Group as Gone under this section
-   still follows Section 6.3.  It accepts later Objects of the Group
+   still follows Section 7.3.  It accepts later Objects of the Group
    only from the source of the Group.
 
-6.6.  Endpoints That Neither Cache Nor Forward
+7.6.  Endpoints That Neither Cache Nor Forward
 
    A subscriber that receives the Track over one session and neither
    caches nor forwards it, such as a player, needs no new data-plane
@@ -332,27 +370,29 @@ Table of Contents
    Original Publisher.  To receive the Track at all, the subscriber MUST
    understand REDUNDANT_PUBLISHERS, so that it does not reject the Track
    under the rules for Mandatory Track Properties in [MOQT].  The
-   subscriber MUST advertise the Setup Option (Section 5).  It ignores
+   subscriber MUST advertise the Setup Option (Section 6).  It ignores
    the Selection Timeout and PUBLISHER_ROLE.  It handles a truncated
-   Group as it handles any Group whose Subgroup streams were reset.
+   Group as it handles any Group whose Subgroup streams were reset.  It
+   MAY compare the tags of the Objects of a Group (Section 5) to detect
+   a Group that mixes two copies.
 
    These two requirements let player implementations add support before
    any Track uses the property, at no cost.
 
    An endpoint that receives the Track over more than one session, for
    example a player connected to two relays, binds each Group to one
-   session, as a relay does (Section 6.1 through Section 6.5).
+   session, as a relay does (Section 7.1 through Section 7.5).
 
-6.7.  Failed and Malformed Sources
+7.7.  Failed and Malformed Sources
 
    A relay MUST treat a source whose Objects make the Track malformed as
    a failed source.  It MUST NOT terminate downstream subscriptions on
    that account while another source remains.  The relay cancels its
    requests to that source.  It truncates any Group bound to that source
-   (Section 6.5).  It continues with the remaining sources.  If no
+   (Section 7.5).  It continues with the remaining sources.  If no
    source remains, the Malformed Track rules in [MOQT] apply.
 
-6.8.  End of Track
+7.8.  End of Track
 
    One source can signal End of Track while another source still
    delivers later Groups, for example when one encoder stops before the
@@ -366,7 +406,7 @@ Table of Contents
    End of Track only when every source of the Track has ended.  It
    forwards the largest End of Track Location that it received.  When
    every source has ended and no source signaled End of Track, the relay
-   truncates a Group in progress (Section 6.5) and ends its downstream
+   truncates a Group in progress (Section 7.5) and ends its downstream
    subscriptions with PUBLISH_DONE and status TRACK_ENDED.
 
    A source can stay connected without delivering any Object or Object
@@ -388,16 +428,16 @@ Table of Contents
 
    A publisher SHOULD end the Track at a Group boundary.
 
-7.  Security Considerations
+8.  Security Considerations
 
    TODO
 
-7.1.  Relay Considerations
+8.1.  Relay Considerations
 
    Holding Objects for the Selection Timeout costs relay memory for
    every Group and every source.  A publisher that sets a long timeout
    raises that cost.  A relay bounds the Objects that it holds before it
-   changes the timeout (Section 6.2).  A relay under memory pressure MAY
+   changes the timeout (Section 7.2).  A relay under memory pressure MAY
    cap the Selection Timeout that it applies at a local maximum.  Such a
    cap changes which source wins at that relay.  Relays with different
    caps can bind the same Group to different Original Publishers.  The
@@ -415,13 +455,26 @@ Table of Contents
    each publisher.  Verification within a Group still works, because no
    Group is ever mixed.
 
-8.  IANA Considerations
+   The tag (Section 5) is not a credential.  An authorized Original
+   Publisher can send the tag of another Original Publisher.  A relay
+   cannot detect the copied tag.  A Group can then mix two copies.  The
+   tag protects a Group against the loss of a binding (Section 7.4).  It
+   does not authenticate an Original Publisher.
+
+   A relay originates Gone under Section 7.5 and Section 7.4.  A
+   subscriber cannot tell that state from Gone signaled by an Original
+   Publisher.  A faulty relay can therefore hide Objects that another
+   Original Publisher still holds.  The Gone state of a relay that
+   follows this document covers at most the rest of one Group.  Every
+   Gone state of the Track expires as Section 7.4 requires.
+
+9.  IANA Considerations
 
    TODO
 
-9.  References
+10.  References
 
-9.1.  Normative References
+10.1.  Normative References
 
    [MOQT]     Nandakumar, S., Vasiliev, V., Swett, I., and A. Frindell,
               "Media over QUIC Transport", Work in Progress, Internet-
@@ -438,7 +491,7 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
-9.2.  Informative References
+10.2.  Informative References
 
    [NETFLIX-MHV26]
               Liu, X., Ummadisetty, R., Lynch, J., and C. Newton,
