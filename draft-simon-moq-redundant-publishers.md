@@ -199,29 +199,9 @@ source with different Track Properties ({{forwarding-and-caching}}).
 Property handles the Track. A relay supporting REDUNDANT_PUBLISHERS follows
 {{relay-behavior}} and forwards the property unchanged.
 
-# PUBLISHER_ROLE {#publisher-role}
-
-PUBLISHER_ROLE (Property Type TBD2) is an optional Object Property ({{MOQT}}).
-The Property Type is even. Therefore, the value is one variable-length integer:
-the role of the Original Publisher of the Object. The role ranges from 0 to 127.
-A value of 0 identifies the main publisher. A higher value identifies a backup
-publisher. The operator sets the role of each Original Publisher. An Original
-Publisher MAY set a different role on a specific Group. For example, an Original
-Publisher sets a higher role on a Group that it knows to contain encoding
-artifacts. An Original Publisher MUST use the same role in every Object of a
-Group.
-
-An Original Publisher with a role SHOULD include PUBLISHER_ROLE in every Object
-of the Track with status Normal. A relay considers an Object without
-PUBLISHER_ROLE, or with a value higher than 127, as an Object with role 127. A
-relay forwards and caches the property unchanged, as {{MOQT}} requires for
-Object Properties. Therefore, a relay at any hop learns the role of the Original
-Publisher of each Object it receives, including the Objects of a FETCH response.
-{{source-selection}} describes how a relay uses the role.
-
 # PUBLISHER_TAG {#publisher-tag}
 
-PUBLISHER_TAG (Property Type TBD) is an Object Property ({{MOQT}}). The
+PUBLISHER_TAG (Property Type TBD2) is an Object Property ({{MOQT}}). The
 Property Type is even. Therefore, the value is one variable-length integer:
 the tag of the Original Publisher of the Object. The Property Type is outside
 the range that {{MOQT}} reserves for Mandatory Track Properties.
@@ -243,9 +223,29 @@ that delivers an Object with status Normal and without PUBLISHER_TAG as a
 failed source ({{failed-sources}}). {{filling-and-fetch}} defines how a relay
 uses the tag.
 
+# PUBLISHER_ROLE {#publisher-role}
+
+PUBLISHER_ROLE (Property Type TBD3) is an optional Object Property ({{MOQT}}).
+The Property Type is even. Therefore, the value is one variable-length integer:
+the role of the Original Publisher of the Object. The role ranges from 0 to 127.
+A value of 0 identifies the main publisher. A higher value identifies a backup
+publisher. The operator sets the role of each Original Publisher. An Original
+Publisher MAY set a different role on a specific Group. For example, an Original
+Publisher sets a higher role on a Group that it knows to contain encoding
+artifacts. An Original Publisher MUST use the same role in every Object of a
+Group.
+
+An Original Publisher with a role SHOULD include PUBLISHER_ROLE in every Object
+of the Track with status Normal. A relay considers an Object without
+PUBLISHER_ROLE, or with a value higher than 127, as an Object with role 127. A
+relay forwards and caches the property unchanged, as {{MOQT}} requires for
+Object Properties. Therefore, a relay at any hop learns the role of the Original
+Publisher of each Object it receives, including the Objects of a FETCH response.
+{{source-selection}} describes how a relay uses the role.
+
 # Setup Option {#setup-option}
 
-REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD3) declares that an endpoint
+REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD4) declares that an endpoint
 supports this document. The Option Type is odd. The value has a length of 0. The
 presence of the option declares support, as the Extension Negotiation section of
 {{MOQT}} allows. The extension is negotiated on a session when both endpoints
@@ -553,31 +553,32 @@ covers at most the rest of one Group. Every Gone state of the Track expires as
 
 # IANA Considerations
 
-This document registers four codepoints in the registries of {{MOQT}}.
+This document registers five codepoints in the registries of {{MOQT}}.
 
-This document registers two entries in the "MOQ Properties" registry:
+This document registers three entries in the "MOQ Properties" registry:
 
 | Type | Name                 | Scope  | Specification            |
 |-----:|:---------------------|:-------|:-------------------------|
 | TBD1 | REDUNDANT_PUBLISHERS | Track  | {{redundant-publishers}} |
-| TBD2 | PUBLISHER_ROLE       | Object | {{publisher-role}}       |
+| TBD2 | PUBLISHER_TAG        | Object | {{publisher-tag}}        |
+| TBD3 | PUBLISHER_ROLE       | Object | {{publisher-role}}       |
 
 TBD1 is an even value in the range of Mandatory Track Properties, 0x4000 to
-0x7FFF. TBD2 is an even value.
+0x7FFF. TBD2 and TBD3 are even values outside that range.
 
 This document registers one entry in the "Setup Options" registry:
 
 | Type | Name                           | Specification    |
 |-----:|:-------------------------------|:-----------------|
-| TBD3 | REDUNDANT_PUBLISHERS_SUPPORTED | {{setup-option}} |
+| TBD4 | REDUNDANT_PUBLISHERS_SUPPORTED | {{setup-option}} |
 
-TBD3 is an odd value.
+TBD4 is an odd value.
 
 This document registers one entry in the "REQUEST_ERROR Codes" registry:
 
 | Name                    | Code | Specification              |
 |:------------------------|:----:|:---------------------------|
-| TRACK_PROPERTY_MISMATCH | TBD4 | {{forwarding-and-caching}} |
+| TRACK_PROPERTY_MISMATCH | TBD5 | {{forwarding-and-caching}} |
 
 --- back
 
