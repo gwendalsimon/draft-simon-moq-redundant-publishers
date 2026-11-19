@@ -5,8 +5,8 @@
 Media Over QUIC                                                 G. Simon
 Internet-Draft                                                   Quortex
 Intended status: Standards Track                                S. Riedl
-Expires: 22 May 2027                                           Paramount
-                                                        18 November 2026
+Expires: 23 May 2027                                           Paramount
+                                                        19 November 2026
 
 
                 Redundant Publishers for Media over QUIC
@@ -23,8 +23,11 @@ Abstract
    Original Publishers of a Track declare that their copies can differ.
    A relay that supports the property delivers each Group from one
    Original Publisher and continues the Track when one Original
-   Publisher fails.  An optional Object Property, PUBLISHER_ROLE, lets a
-   relay prefer a main publisher.
+   Publisher fails.  Every Object carries PUBLISHER_TAG, an Object
+   Property that identifies its Original Publisher.  A relay uses the
+   tag to keep each Group from one Original Publisher across several
+   hops.  An optional Object Property, PUBLISHER_ROLE, lets a relay
+   prefer a main publisher.
 
 About This Document
 
@@ -59,7 +62,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 May 2027.
+   This Internet-Draft will expire on 23 May 2027.
 
 Copyright Notice
 
