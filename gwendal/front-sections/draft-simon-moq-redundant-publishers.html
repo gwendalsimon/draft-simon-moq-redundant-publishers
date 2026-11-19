@@ -1463,19 +1463,20 @@ Publisher of each Object it receives, including the Objects of a FETCH response.
       <h2 id="name-setup-option">
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-setup-option" class="section-name selfRef">Setup Option</a>
       </h2>
-<p id="section-7-1">REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD4) declares that an endpoint
-supports this document. The Option Type is odd. The value has a length of 0. The
-presence of the option declares support, as the Extension Negotiation section of
-<span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> allows. The extension is negotiated on a session when both endpoints
-include the option in SETUP.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-1">REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD4) declares that an
+endpoint supports this document. The Option Type is odd. The value has a length
+of 0. The presence of the option declares support, as the Extension Negotiation
+section of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> allows. The extension is negotiated on a session when both
+endpoints include the option in SETUP.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <p id="section-7-2">An endpoint advertising the option supports the REDUNDANT_PUBLISHERS Track
 Property (<a href="#redundant-publishers" class="auto internal xref">Section 4</a>). A relay advertising the option <span class="bcp14">MUST</span> follow
-<a href="#relay-behavior" class="auto internal xref">Section 8</a>, including the use of PUBLISHER_ROLE (<a href="#publisher-role" class="auto internal xref">Section 6</a>).<a href="#section-7-2" class="pilcrow">¶</a></p>
+<a href="#relay-behavior" class="auto internal xref">Section 8</a>, including the use of PUBLISHER_TAG (<a href="#publisher-tag" class="auto internal xref">Section 5</a>) and
+PUBLISHER_ROLE (<a href="#publisher-role" class="auto internal xref">Section 6</a>).<a href="#section-7-2" class="pilcrow">¶</a></p>
 <p id="section-7-3">The Setup Option tells a publisher whether a subscriber supports
 REDUNDANT_PUBLISHERS. On a session without the negotiated extension, a publisher
-<span class="bcp14">MUST</span> reject a SUBSCRIBE or a FETCH for a Track with REDUNDANT_PUBLISHERS with
-the error code UNSUPPORTED_EXTENSION. The publisher <span class="bcp14">MUST NOT</span> send PUBLISH for
-such a Track on that session.<a href="#section-7-3" class="pilcrow">¶</a></p>
+applies the rules of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> for a subscriber that does not support a Mandatory
+Track Property. A subscriber that receives the Track without support refuses it
+under the same rules.<a href="#section-7-3" class="pilcrow">¶</a></p>
 <p id="section-7-4">This extension applies to the version of MOQT that <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> defines.<a href="#section-7-4" class="pilcrow">¶</a></p>
 </section>
 </div>
