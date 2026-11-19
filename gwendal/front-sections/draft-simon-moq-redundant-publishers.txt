@@ -592,13 +592,15 @@ Table of Contents
 
 9.  Security Considerations
 
-   The security considerations of [MOQT] apply.  This document adds two
+   The security considerations of [MOQT] apply.  This document adds four
    considerations for relays.  A relay holds Objects during the
    Selection Timeout, which costs memory.  A relay also no longer treats
    two different Objects at the same Location as a Malformed Track.
    Therefore, the relay cannot detect a corrupted or forged copy of a
-   Group by comparison with another copy.  Section 9.1 describes both
-   considerations, with the effect of roles and of per-Object
+   Group by comparison with another copy.  The tag identifies an
+   Original Publisher without authenticating it.  A relay originates
+   Gone for the rest of a truncated Group.  Section 9.1 describes the
+   four considerations, with the effect of roles and of per-Object
    signatures.
 
 9.1.  Relay Considerations

@@ -1754,12 +1754,14 @@ downstream subscriptions with PUBLISH_DONE and status TRACK_ENDED.<a href="#sect
       <h2 id="name-security-considerations">
 <a href="#section-9" class="section-number selfRef">9. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-9-1">The security considerations of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> apply. This document adds two
-considerations for relays. A relay holds Objects during the Selection Timeout, which costs
-memory. A relay also no longer treats two different Objects at the same Location
-as a Malformed Track. Therefore, the relay cannot detect a corrupted or forged
-copy of a Group by comparison with another copy. <a href="#relay-security" class="auto internal xref">Section 9.1</a> describes
-both considerations, with the effect of roles and of per-Object signatures.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-1">The security considerations of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> apply. This document adds four
+considerations for relays. A relay holds Objects during the Selection Timeout,
+which costs memory. A relay also no longer treats two different Objects at the
+same Location as a Malformed Track. Therefore, the relay cannot detect a
+corrupted or forged copy of a Group by comparison with another copy. The tag
+identifies an Original Publisher without authenticating it. A relay originates
+Gone for the rest of a truncated Group. <a href="#relay-security" class="auto internal xref">Section 9.1</a> describes the four
+considerations, with the effect of roles and of per-Object signatures.<a href="#section-9-1" class="pilcrow">¶</a></p>
 <div id="relay-security">
 <section id="section-9.1">
         <h3 id="name-relay-considerations">
