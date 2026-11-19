@@ -114,15 +114,20 @@ Option as defined in {{MOQT}}.
 
 This document also uses the following terms:
 
+Tag:
+: A number that an Original Publisher builds when it starts and includes in
+  every Object it publishes ({{publisher-tag}}). Two Objects with the same tag
+  come from the same Original Publisher, with no restart between them.
+
 Role:
-: The rank of an Original Publisher in an order of preference set by the
-  operator ({{publisher-role}}). A relay prefers a lower role.
+: The preference value that an Original Publisher carries in each Object
+  ({{publisher-role}}). A relay prefers a lower role.
 
 Main publisher:
-: An Original Publisher with role 0.
+: The Original Publisher to which the operator gives role 0.
 
 Backup publisher:
-: An Original Publisher with a role higher than 0.
+: An Original Publisher to which the operator gives a role higher than 0.
 
 Selection Timeout:
 : The maximum time a relay waits, after the first Object of a Group arrives,
@@ -137,11 +142,6 @@ Source:
 Binding:
 : The association of one Group of the Track with one source. A relay delivers
   a bound Group only from that source ({{sources-and-bindings}}).
-
-Tag:
-: A number that an Original Publisher builds when it starts and includes in
-  every Object it publishes ({{publisher-tag}}). Two Objects with the same tag
-  come from the same Original Publisher, with no restart between them.
 
 Truncated Group:
 : A Group whose source ended before delivering all of it
