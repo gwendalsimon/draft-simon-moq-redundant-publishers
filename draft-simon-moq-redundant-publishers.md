@@ -403,6 +403,13 @@ a Gone state of the Track longer than it keeps the Objects of the Track. Once
 the Objects and the Gone state of a Group expire, a later request can bind the
 Group again and obtain a complete copy.
 
+Open issue: a relay that holds part of a Group can request the rest from an
+upstream relay whose binding of the Group has ended. The tag check then
+truncates the Group. A FETCH parameter that carries the tag would let the
+upstream relay request the rest from the same Original Publisher. The same
+parameter would apply to a fill (FILL_PARAMETERS in {{MOQT}}). See
+https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/16.
+
 ## Truncated Groups {#truncated-groups}
 
 A relay does not complete a truncated Group from another source. The relay
