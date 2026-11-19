@@ -151,7 +151,8 @@ Truncated Group:
 
 Two or more Original Publishers publish the same Track and set the
 REDUNDANT_PUBLISHERS Track Property ({{redundant-publishers}}). The property
-carries a Selection Timeout. An operator can also give each Original Publisher a
+carries a Selection Timeout. Each Original Publisher includes its tag in every
+Object ({{publisher-tag}}). An operator can also give each Original Publisher a
 role ({{publisher-role}}): one main publisher and one or more backup publishers,
 in order of preference. Each Object then carries the role of its Original
 Publisher.
@@ -166,7 +167,9 @@ relay discards the copies of the Group received from other sources
 A source can fail while it delivers a Group. The relay does not complete the
 Group from another source, because the result would mix two copies. The relay
 truncates the Group and delivers the next Group from another source.
-Therefore, the subscribers lose at most the end of one Group.
+Therefore, the subscribers lose at most the end of one Group. A relay that
+receives an Object whose tag differs from the tag of the Group that it holds
+discards the Object and truncates the Group.
 
 A Setup Option ({{setup-option}}) declares support for the property. Under the
 rules for Mandatory Track Properties in {{MOQT}}, an endpoint without support
