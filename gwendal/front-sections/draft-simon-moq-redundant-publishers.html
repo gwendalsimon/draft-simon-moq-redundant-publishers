@@ -1303,47 +1303,47 @@ Publisher, Track Property, Object Property, Mandatory Track Property, and Setup
 Option as defined in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>.<a href="#section-2-2" class="pilcrow">¶</a></p>
 <p id="section-2-3">This document also uses the following terms:<a href="#section-2-3" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-2-4">
-        <dt id="section-2-4.1">Role:</dt>
+        <dt id="section-2-4.1">Tag:</dt>
         <dd style="margin-left: 1.5em" id="section-2-4.2">
-          <p id="section-2-4.2.1">The rank of an Original Publisher in an order of preference set by the
-operator (<a href="#publisher-role" class="auto internal xref">Section 6</a>). A relay prefers a lower role.<a href="#section-2-4.2.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="section-2-4.3">Main publisher:</dt>
-        <dd style="margin-left: 1.5em" id="section-2-4.4">
-          <p id="section-2-4.4.1">An Original Publisher with role 0.<a href="#section-2-4.4.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="section-2-4.5">Backup publisher:</dt>
-        <dd style="margin-left: 1.5em" id="section-2-4.6">
-          <p id="section-2-4.6.1">An Original Publisher with a role higher than 0.<a href="#section-2-4.6.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="section-2-4.7">Selection Timeout:</dt>
-        <dd style="margin-left: 1.5em" id="section-2-4.8">
-          <p id="section-2-4.8.1">The maximum time a relay waits, after the first Object of a Group arrives,
-before it chooses the source of the Group (<a href="#source-selection" class="auto internal xref">Section 8.2</a>). The
-REDUNDANT_PUBLISHERS property carries it (<a href="#redundant-publishers" class="auto internal xref">Section 4</a>).<a href="#section-2-4.8.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="section-2-4.9">Source:</dt>
-        <dd style="margin-left: 1.5em" id="section-2-4.10">
-          <p id="section-2-4.10.1">An upstream session over which a relay receives the Track, through a
-subscription, a PUBLISH, or a FETCH. Each session is a distinct source. A new
-session to the same peer after a reconnect is a new source.<a href="#section-2-4.10.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="section-2-4.11">Binding:</dt>
-        <dd style="margin-left: 1.5em" id="section-2-4.12">
-          <p id="section-2-4.12.1">The association of one Group of the Track with one source. A relay delivers
-a bound Group only from that source (<a href="#sources-and-bindings" class="auto internal xref">Section 8.1</a>).<a href="#section-2-4.12.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="section-2-4.13">Tag:</dt>
-        <dd style="margin-left: 1.5em" id="section-2-4.14">
-          <p id="section-2-4.14.1">A number that an Original Publisher builds when it starts and includes in
+          <p id="section-2-4.2.1">A number that an Original Publisher builds when it starts and includes in
 every Object it publishes (<a href="#publisher-tag" class="auto internal xref">Section 5</a>). Two Objects with the same tag
-come from the same Original Publisher, with no restart between them.<a href="#section-2-4.14.1" class="pilcrow">¶</a></p>
+come from the same Original Publisher, with no restart between them.<a href="#section-2-4.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-4.3">Role:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-4.4">
+          <p id="section-2-4.4.1">The preference value that an Original Publisher carries in each Object
+(<a href="#publisher-role" class="auto internal xref">Section 6</a>). A relay prefers a lower role.<a href="#section-2-4.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-4.5">Main publisher:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-4.6">
+          <p id="section-2-4.6.1">The Original Publisher to which the operator gives role 0.<a href="#section-2-4.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-4.7">Backup publisher:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-4.8">
+          <p id="section-2-4.8.1">An Original Publisher to which the operator gives a role higher than 0.<a href="#section-2-4.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-4.9">Selection Timeout:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-4.10">
+          <p id="section-2-4.10.1">The maximum time a relay waits, after the first Object of a Group arrives,
+before it chooses the source of the Group (<a href="#source-selection" class="auto internal xref">Section 8.2</a>). The
+REDUNDANT_PUBLISHERS property carries it (<a href="#redundant-publishers" class="auto internal xref">Section 4</a>).<a href="#section-2-4.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-4.11">Source:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-4.12">
+          <p id="section-2-4.12.1">An upstream session over which a relay receives the Track, through a
+subscription, a PUBLISH, or a FETCH. Each session is a distinct source. A new
+session to the same peer after a reconnect is a new source.<a href="#section-2-4.12.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-4.13">Binding:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-4.14">
+          <p id="section-2-4.14.1">The association of one Group of the Track with one source. A relay delivers
+a bound Group only from that source (<a href="#sources-and-bindings" class="auto internal xref">Section 8.1</a>).<a href="#section-2-4.14.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-4.15">Truncated Group:</dt>
