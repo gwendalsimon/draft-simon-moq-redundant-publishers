@@ -193,10 +193,11 @@ Table of Contents
 
    Two or more Original Publishers publish the same Track and set the
    REDUNDANT_PUBLISHERS Track Property (Section 4).  The property
-   carries a Selection Timeout.  An operator can also give each Original
-   Publisher a role (Section 5): one main publisher and one or more
-   backup publishers, in order of preference.  Each Object then carries
-   the role of its Original Publisher.
+   carries a Selection Timeout.  Each Original Publisher includes its
+   tag in every Object (Section 6).  An operator can also give each
+   Original Publisher a role (Section 5): one main publisher and one or
+   more backup publishers, in order of preference.  Each Object then
+   carries the role of its Original Publisher.
 
    A relay delivers each Group of the Track from one source.  The relay
    waits for the Selection Timeout after the first Object of a Group
@@ -209,7 +210,9 @@ Table of Contents
    complete the Group from another source, because the result would mix
    two copies.  The relay truncates the Group and delivers the next
    Group from another source.  Therefore, the subscribers lose at most
-   the end of one Group.
+   the end of one Group.  A relay that receives an Object whose tag
+   differs from the tag of the Group that it holds discards the Object
+   and truncates the Group.
 
    A Setup Option (Section 7) declares support for the property.  Under
    the rules for Mandatory Track Properties in [MOQT], an endpoint

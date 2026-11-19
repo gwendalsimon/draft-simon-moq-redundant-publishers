@@ -1362,7 +1362,8 @@ come from the same Original Publisher, with no restart between them.<a href="#se
       </h2>
 <p id="section-3-1">Two or more Original Publishers publish the same Track and set the
 REDUNDANT_PUBLISHERS Track Property (<a href="#redundant-publishers" class="auto internal xref">Section 4</a>). The property
-carries a Selection Timeout. An operator can also give each Original Publisher a
+carries a Selection Timeout. Each Original Publisher includes its tag in every
+Object (<a href="#publisher-tag" class="auto internal xref">Section 6</a>). An operator can also give each Original Publisher a
 role (<a href="#publisher-role" class="auto internal xref">Section 5</a>): one main publisher and one or more backup publishers,
 in order of preference. Each Object then carries the role of its Original
 Publisher.<a href="#section-3-1" class="pilcrow">¶</a></p>
@@ -1375,7 +1376,9 @@ relay discards the copies of the Group received from other sources
 <p id="section-3-3">A source can fail while it delivers a Group. The relay does not complete the
 Group from another source, because the result would mix two copies. The relay
 truncates the Group and delivers the next Group from another source.
-Therefore, the subscribers lose at most the end of one Group.<a href="#section-3-3" class="pilcrow">¶</a></p>
+Therefore, the subscribers lose at most the end of one Group. A relay that
+receives an Object whose tag differs from the tag of the Group that it holds
+discards the Object and truncates the Group.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <p id="section-3-4">A Setup Option (<a href="#setup-option" class="auto internal xref">Section 7</a>) declares support for the property. Under the
 rules for Mandatory Track Properties in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>, an endpoint without support
 for the property does not carry the Track. A player receiving the Track over
