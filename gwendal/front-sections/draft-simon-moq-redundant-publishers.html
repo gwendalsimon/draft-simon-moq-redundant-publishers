@@ -1184,10 +1184,10 @@ publisher.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
             <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-redundant_publishers" class="internal xref">REDUNDANT_PUBLISHERS</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
-            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-publisher_role" class="internal xref">PUBLISHER_ROLE</a></p>
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-publisher_tag" class="internal xref">PUBLISHER_TAG</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
-            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-publisher_tag" class="internal xref">PUBLISHER_TAG</a></p>
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-publisher_role" class="internal xref">PUBLISHER_ROLE</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
             <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-setup-option" class="internal xref">Setup Option</a></p>
@@ -1306,7 +1306,7 @@ Option as defined in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>.<
         <dt id="section-2-4.1">Role:</dt>
         <dd style="margin-left: 1.5em" id="section-2-4.2">
           <p id="section-2-4.2.1">The rank of an Original Publisher in an order of preference set by the
-operator (<a href="#publisher-role" class="auto internal xref">Section 5</a>). A relay prefers a lower role.<a href="#section-2-4.2.1" class="pilcrow">¶</a></p>
+operator (<a href="#publisher-role" class="auto internal xref">Section 6</a>). A relay prefers a lower role.<a href="#section-2-4.2.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-4.3">Main publisher:</dt>
@@ -1342,7 +1342,7 @@ a bound Group only from that source (<a href="#sources-and-bindings" class="auto
 <dt id="section-2-4.13">Tag:</dt>
         <dd style="margin-left: 1.5em" id="section-2-4.14">
           <p id="section-2-4.14.1">A number that an Original Publisher builds when it starts and includes in
-every Object it publishes (<a href="#publisher-tag" class="auto internal xref">Section 6</a>). Two Objects with the same tag
+every Object it publishes (<a href="#publisher-tag" class="auto internal xref">Section 5</a>). Two Objects with the same tag
 come from the same Original Publisher, with no restart between them.<a href="#section-2-4.14.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
@@ -1363,8 +1363,8 @@ come from the same Original Publisher, with no restart between them.<a href="#se
 <p id="section-3-1">Two or more Original Publishers publish the same Track and set the
 REDUNDANT_PUBLISHERS Track Property (<a href="#redundant-publishers" class="auto internal xref">Section 4</a>). The property
 carries a Selection Timeout. Each Original Publisher includes its tag in every
-Object (<a href="#publisher-tag" class="auto internal xref">Section 6</a>). An operator can also give each Original Publisher a
-role (<a href="#publisher-role" class="auto internal xref">Section 5</a>): one main publisher and one or more backup publishers,
+Object (<a href="#publisher-tag" class="auto internal xref">Section 5</a>). An operator can also give each Original Publisher a
+role (<a href="#publisher-role" class="auto internal xref">Section 6</a>): one main publisher and one or more backup publishers,
 in order of preference. Each Object then carries the role of its Original
 Publisher.<a href="#section-3-1" class="pilcrow">¶</a></p>
 <p id="section-3-2">A relay delivers each Group of the Track from one source. The relay waits for
@@ -1409,12 +1409,38 @@ Property handles the Track. A relay supporting REDUNDANT_PUBLISHERS follows
 <a href="#relay-behavior" class="auto internal xref">Section 8</a> and forwards the property unchanged.<a href="#section-4-4" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="publisher-role">
+<div id="publisher-tag">
 <section id="section-5">
-      <h2 id="name-publisher_role">
-<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-publisher_role" class="section-name selfRef">PUBLISHER_ROLE</a>
+      <h2 id="name-publisher_tag">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-publisher_tag" class="section-name selfRef">PUBLISHER_TAG</a>
       </h2>
-<p id="section-5-1">PUBLISHER_ROLE (Property Type TBD2) is an optional Object Property (<span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>).
+<p id="section-5-1">PUBLISHER_TAG (Property Type TBD2) is an Object Property (<span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>). The
+Property Type is even. Therefore, the value is one variable-length integer:
+the tag of the Original Publisher of the Object. The Property Type is outside
+the range that <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> reserves for Mandatory Track Properties.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">The tag identifies an Original Publisher between two restarts. The tag has 21
+bits. An Original Publisher builds its tag when it starts. The 16 high bits
+carry the last 16 bits of its start time in milliseconds. The 5 low bits carry a
+random nonce. An Original Publisher that restarts without the state of its
+previous run <span class="bcp14">MUST</span> build a new tag. An Original Publisher that reconnects with
+its state keeps its tag. An Original Publisher uses the same tag in every Track
+that it publishes during one run.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">An Original Publisher <span class="bcp14">MUST</span> include PUBLISHER_TAG in every Object of the Track
+with status Normal, including the Objects that it sends as Datagrams. A relay
+forwards and caches the property unchanged, as <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> requires for Object
+Properties. Therefore, every copy of an Object carries the tag of its Original
+Publisher, including a copy in a FETCH response. A relay <span class="bcp14">MUST</span> treat a source
+that delivers an Object with status Normal and without PUBLISHER_TAG as a
+failed source (<a href="#failed-sources" class="auto internal xref">Section 8.7</a>). <a href="#filling-and-fetch" class="auto internal xref">Section 8.4</a> defines how a relay
+uses the tag.<a href="#section-5-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="publisher-role">
+<section id="section-6">
+      <h2 id="name-publisher_role">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-publisher_role" class="section-name selfRef">PUBLISHER_ROLE</a>
+      </h2>
+<p id="section-6-1">PUBLISHER_ROLE (Property Type TBD3) is an optional Object Property (<span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>).
 The Property Type is even. Therefore, the value is one variable-length integer:
 the role of the Original Publisher of the Object. The role ranges from 0 to 127.
 A value of 0 identifies the main publisher. A higher value identifies a backup
@@ -1422,40 +1448,14 @@ publisher. The operator sets the role of each Original Publisher. An Original
 Publisher <span class="bcp14">MAY</span> set a different role on a specific Group. For example, an Original
 Publisher sets a higher role on a Group that it knows to contain encoding
 artifacts. An Original Publisher <span class="bcp14">MUST</span> use the same role in every Object of a
-Group.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<p id="section-5-2">An Original Publisher with a role <span class="bcp14">SHOULD</span> include PUBLISHER_ROLE in every Object
+Group.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">An Original Publisher with a role <span class="bcp14">SHOULD</span> include PUBLISHER_ROLE in every Object
 of the Track with status Normal. A relay considers an Object without
 PUBLISHER_ROLE, or with a value higher than 127, as an Object with role 127. A
 relay forwards and caches the property unchanged, as <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> requires for
 Object Properties. Therefore, a relay at any hop learns the role of the Original
 Publisher of each Object it receives, including the Objects of a FETCH response.
-<a href="#source-selection" class="auto internal xref">Section 8.2</a> describes how a relay uses the role.<a href="#section-5-2" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="publisher-tag">
-<section id="section-6">
-      <h2 id="name-publisher_tag">
-<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-publisher_tag" class="section-name selfRef">PUBLISHER_TAG</a>
-      </h2>
-<p id="section-6-1">PUBLISHER_TAG (Property Type TBD) is an Object Property (<span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>). The
-Property Type is even. Therefore, the value is one variable-length integer:
-the tag of the Original Publisher of the Object. The Property Type is outside
-the range that <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> reserves for Mandatory Track Properties.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<p id="section-6-2">The tag identifies an Original Publisher between two restarts. The tag has 21
-bits. An Original Publisher builds its tag when it starts. The 16 high bits
-carry the last 16 bits of its start time in milliseconds. The 5 low bits carry a
-random nonce. An Original Publisher that restarts without the state of its
-previous run <span class="bcp14">MUST</span> build a new tag. An Original Publisher that reconnects with
-its state keeps its tag. An Original Publisher uses the same tag in every Track
-that it publishes during one run.<a href="#section-6-2" class="pilcrow">¶</a></p>
-<p id="section-6-3">An Original Publisher <span class="bcp14">MUST</span> include PUBLISHER_TAG in every Object of the Track
-with status Normal, including the Objects that it sends as Datagrams. A relay
-forwards and caches the property unchanged, as <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> requires for Object
-Properties. Therefore, every copy of an Object carries the tag of its Original
-Publisher, including a copy in a FETCH response. A relay <span class="bcp14">MUST</span> treat a source
-that delivers an Object with status Normal and without PUBLISHER_TAG as a
-failed source (<a href="#failed-sources" class="auto internal xref">Section 8.7</a>). <a href="#filling-and-fetch" class="auto internal xref">Section 8.4</a> defines how a relay
-uses the tag.<a href="#section-6-3" class="pilcrow">¶</a></p>
+<a href="#source-selection" class="auto internal xref">Section 8.2</a> describes how a relay uses the role.<a href="#section-6-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="setup-option">
@@ -1463,14 +1463,14 @@ uses the tag.<a href="#section-6-3" class="pilcrow">¶</a></p>
       <h2 id="name-setup-option">
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-setup-option" class="section-name selfRef">Setup Option</a>
       </h2>
-<p id="section-7-1">REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD3) declares that an endpoint
+<p id="section-7-1">REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD4) declares that an endpoint
 supports this document. The Option Type is odd. The value has a length of 0. The
 presence of the option declares support, as the Extension Negotiation section of
 <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> allows. The extension is negotiated on a session when both endpoints
 include the option in SETUP.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <p id="section-7-2">An endpoint advertising the option supports the REDUNDANT_PUBLISHERS Track
 Property (<a href="#redundant-publishers" class="auto internal xref">Section 4</a>). A relay advertising the option <span class="bcp14">MUST</span> follow
-<a href="#relay-behavior" class="auto internal xref">Section 8</a>, including the use of PUBLISHER_ROLE (<a href="#publisher-role" class="auto internal xref">Section 5</a>).<a href="#section-7-2" class="pilcrow">¶</a></p>
+<a href="#relay-behavior" class="auto internal xref">Section 8</a>, including the use of PUBLISHER_ROLE (<a href="#publisher-role" class="auto internal xref">Section 6</a>).<a href="#section-7-2" class="pilcrow">¶</a></p>
 <p id="section-7-3">The Setup Option tells a publisher whether a subscriber supports
 REDUNDANT_PUBLISHERS. On a session without the negotiated extension, a publisher
 <span class="bcp14">MUST</span> reject a SUBSCRIBE or a FETCH for a Track with REDUNDANT_PUBLISHERS with
@@ -1517,7 +1517,7 @@ Original Publisher. The same holds for every copy downstream of the relay.<a hre
 <p id="section-8.2-1">A relay <span class="bcp14">SHOULD</span> bind a Group when the Selection Timeout expires. The timeout
 starts when the relay receives the first Object of the Group from any source.
 The role of a source for the Group is the role in the first Object of the Group
-received from that source (<a href="#publisher-role" class="auto internal xref">Section 5</a>). The relay binds the Group to the
+received from that source (<a href="#publisher-role" class="auto internal xref">Section 6</a>). The relay binds the Group to the
 source with the lowest role. When several sources have the lowest role, the
 relay binds the Group to the source whose first Object of the Group arrived
 earliest. When the Selection Timeout is 0, the relay binds the Group to the
@@ -1611,7 +1611,7 @@ of the Group. Once the relay holds none, the binding ends. A later request <span
 then bind the Group again, possibly to a different source. A relay <span class="bcp14">MAY</span>
 remember the source of a Group after the binding ends, so that it binds the
 Group to the same source again.<a href="#section-8.4-3" class="pilcrow">¶</a></p>
-<p id="section-8.4-4">The tag (<a href="#publisher-tag" class="auto internal xref">Section 6</a>) protects a Group after a binding ends upstream.
+<p id="section-8.4-4">The tag (<a href="#publisher-tag" class="auto internal xref">Section 5</a>) protects a Group after a binding ends upstream.
 All Objects of a Group that a relay holds carry the same tag, because they
 come from one Original Publisher. A relay <span class="bcp14">SHOULD</span> compare the tag of each Object
 that it receives from the source of a Group with the tag of the Objects of
@@ -1685,7 +1685,7 @@ does not reject the Track under the rules for Mandatory Track Properties in
 <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>. The subscriber <span class="bcp14">MUST</span> advertise the Setup Option (<a href="#setup-option" class="auto internal xref">Section 7</a>).
 It ignores the Selection Timeout and PUBLISHER_ROLE. It handles a truncated
 Group as it handles any Group whose Subgroup streams were reset. It <span class="bcp14">MAY</span>
-compare the tags of the Objects of a Group (<a href="#publisher-tag" class="auto internal xref">Section 6</a>) to detect a
+compare the tags of the Objects of a Group (<a href="#publisher-tag" class="auto internal xref">Section 5</a>) to detect a
 Group that mixes two copies.<a href="#section-8.6-1" class="pilcrow">¶</a></p>
 <p id="section-8.6-2">These two requirements let player implementations add support before any
 Track uses the property, at no cost.<a href="#section-8.6-2" class="pilcrow">¶</a></p>
@@ -1776,7 +1776,7 @@ and win every selection. The role expresses a preference, not a credential.<a hr
 signatures, for example in Immutable Properties (<span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>), therefore differ
 between Groups. A verifier has to accept the key of each publisher.
 Verification within a Group still works, because no Group is ever mixed.<a href="#section-9.1-3" class="pilcrow">¶</a></p>
-<p id="section-9.1-4">The tag (<a href="#publisher-tag" class="auto internal xref">Section 6</a>) is not a credential. An authorized Original
+<p id="section-9.1-4">The tag (<a href="#publisher-tag" class="auto internal xref">Section 5</a>) is not a credential. An authorized Original
 Publisher can send the tag of another Original Publisher. A relay cannot
 detect the copied tag. A Group can then mix two copies. The tag protects a
 Group against the loss of a binding (<a href="#filling-and-fetch" class="auto internal xref">Section 8.4</a>). It does not
@@ -1796,8 +1796,8 @@ covers at most the rest of one Group. Every Gone state of the Track expires as
       <h2 id="name-iana-considerations">
 <a href="#section-10" class="section-number selfRef">10. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-10-1">This document registers four codepoints in the registries of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>.<a href="#section-10-1" class="pilcrow">¶</a></p>
-<p id="section-10-2">This document registers two entries in the "MOQ Properties" registry:<a href="#section-10-2" class="pilcrow">¶</a></p>
+<p id="section-10-1">This document registers five codepoints in the registries of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>.<a href="#section-10-1" class="pilcrow">¶</a></p>
+<p id="section-10-2">This document registers three entries in the "MOQ Properties" registry:<a href="#section-10-2" class="pilcrow">¶</a></p>
 <table class="center" id="table-1">
         <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
 <thead>
@@ -1819,16 +1819,24 @@ covers at most the rest of one Group. Every Gone state of the Track expires as
           </tr>
           <tr>
             <td class="text-right" rowspan="1" colspan="1">TBD2</td>
+            <td class="text-left" rowspan="1" colspan="1">PUBLISHER_TAG</td>
+            <td class="text-left" rowspan="1" colspan="1">Object</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <a href="#publisher-tag" class="auto internal xref">Section 5</a>
+</td>
+          </tr>
+          <tr>
+            <td class="text-right" rowspan="1" colspan="1">TBD3</td>
             <td class="text-left" rowspan="1" colspan="1">PUBLISHER_ROLE</td>
             <td class="text-left" rowspan="1" colspan="1">Object</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#publisher-role" class="auto internal xref">Section 5</a>
+              <a href="#publisher-role" class="auto internal xref">Section 6</a>
 </td>
           </tr>
         </tbody>
       </table>
 <p id="section-10-4">TBD1 is an even value in the range of Mandatory Track Properties, 0x4000 to
-0x7FFF. TBD2 is an even value.<a href="#section-10-4" class="pilcrow">¶</a></p>
+0x7FFF. TBD2 and TBD3 are even values outside that range.<a href="#section-10-4" class="pilcrow">¶</a></p>
 <p id="section-10-5">This document registers one entry in the "Setup Options" registry:<a href="#section-10-5" class="pilcrow">¶</a></p>
 <table class="center" id="table-2">
         <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
@@ -1841,7 +1849,7 @@ covers at most the rest of one Group. Every Gone state of the Track expires as
         </thead>
         <tbody>
           <tr>
-            <td class="text-right" rowspan="1" colspan="1">TBD3</td>
+            <td class="text-right" rowspan="1" colspan="1">TBD4</td>
             <td class="text-left" rowspan="1" colspan="1">REDUNDANT_PUBLISHERS_SUPPORTED</td>
             <td class="text-left" rowspan="1" colspan="1">
               <a href="#setup-option" class="auto internal xref">Section 7</a>
@@ -1849,7 +1857,7 @@ covers at most the rest of one Group. Every Gone state of the Track expires as
           </tr>
         </tbody>
       </table>
-<p id="section-10-7">TBD3 is an odd value.<a href="#section-10-7" class="pilcrow">¶</a></p>
+<p id="section-10-7">TBD4 is an odd value.<a href="#section-10-7" class="pilcrow">¶</a></p>
 <p id="section-10-8">This document registers one entry in the "REQUEST_ERROR Codes" registry:<a href="#section-10-8" class="pilcrow">¶</a></p>
 <table class="center" id="table-3">
         <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
@@ -1863,7 +1871,7 @@ covers at most the rest of one Group. Every Gone state of the Track expires as
         <tbody>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">TRACK_PROPERTY_MISMATCH</td>
-            <td class="text-center" rowspan="1" colspan="1">TBD4</td>
+            <td class="text-center" rowspan="1" colspan="1">TBD5</td>
             <td class="text-left" rowspan="1" colspan="1">
               <a href="#forwarding-and-caching" class="auto internal xref">Section 8.3</a>
 </td>

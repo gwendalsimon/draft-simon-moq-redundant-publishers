@@ -84,8 +84,8 @@ Table of Contents
    2.  Conventions and Definitions
    3.  Overview
    4.  REDUNDANT_PUBLISHERS
-   5.  PUBLISHER_ROLE
-   6.  PUBLISHER_TAG
+   5.  PUBLISHER_TAG
+   6.  PUBLISHER_ROLE
    7.  Setup Option
    8.  Relay Behavior
      8.1.  Sources and Bindings
@@ -161,7 +161,7 @@ Table of Contents
    This document also uses the following terms:
 
    Role:  The rank of an Original Publisher in an order of preference
-      set by the operator (Section 5).  A relay prefers a lower role.
+      set by the operator (Section 6).  A relay prefers a lower role.
 
    Main publisher:  An Original Publisher with role 0.
 
@@ -182,7 +182,7 @@ Table of Contents
       (Section 8.1).
 
    Tag:  A number that an Original Publisher builds when it starts and
-      includes in every Object it publishes (Section 6).  Two Objects
+      includes in every Object it publishes (Section 5).  Two Objects
       with the same tag come from the same Original Publisher, with no
       restart between them.
 
@@ -194,8 +194,8 @@ Table of Contents
    Two or more Original Publishers publish the same Track and set the
    REDUNDANT_PUBLISHERS Track Property (Section 4).  The property
    carries a Selection Timeout.  Each Original Publisher includes its
-   tag in every Object (Section 6).  An operator can also give each
-   Original Publisher a role (Section 5): one main publisher and one or
+   tag in every Object (Section 5).  An operator can also give each
+   Original Publisher a role (Section 6): one main publisher and one or
    more backup publishers, in order of preference.  Each Object then
    carries the role of its Original Publisher.
 
@@ -244,31 +244,9 @@ Table of Contents
    Property handles the Track.  A relay supporting REDUNDANT_PUBLISHERS
    follows Section 8 and forwards the property unchanged.
 
-5.  PUBLISHER_ROLE
+5.  PUBLISHER_TAG
 
-   PUBLISHER_ROLE (Property Type TBD2) is an optional Object Property
-   ([MOQT]).  The Property Type is even.  Therefore, the value is one
-   variable-length integer: the role of the Original Publisher of the
-   Object.  The role ranges from 0 to 127.  A value of 0 identifies the
-   main publisher.  A higher value identifies a backup publisher.  The
-   operator sets the role of each Original Publisher.  An Original
-   Publisher MAY set a different role on a specific Group.  For example,
-   an Original Publisher sets a higher role on a Group that it knows to
-   contain encoding artifacts.  An Original Publisher MUST use the same
-   role in every Object of a Group.
-
-   An Original Publisher with a role SHOULD include PUBLISHER_ROLE in
-   every Object of the Track with status Normal.  A relay considers an
-   Object without PUBLISHER_ROLE, or with a value higher than 127, as an
-   Object with role 127.  A relay forwards and caches the property
-   unchanged, as [MOQT] requires for Object Properties.  Therefore, a
-   relay at any hop learns the role of the Original Publisher of each
-   Object it receives, including the Objects of a FETCH response.
-   Section 8.2 describes how a relay uses the role.
-
-6.  PUBLISHER_TAG
-
-   PUBLISHER_TAG (Property Type TBD) is an Object Property ([MOQT]).
+   PUBLISHER_TAG (Property Type TBD2) is an Object Property ([MOQT]).
    The Property Type is even.  Therefore, the value is one variable-
    length integer: the tag of the Original Publisher of the Object.  The
    Property Type is outside the range that [MOQT] reserves for Mandatory
@@ -292,9 +270,31 @@ Table of Contents
    Object with status Normal and without PUBLISHER_TAG as a failed
    source (Section 8.7).  Section 8.4 defines how a relay uses the tag.
 
+6.  PUBLISHER_ROLE
+
+   PUBLISHER_ROLE (Property Type TBD3) is an optional Object Property
+   ([MOQT]).  The Property Type is even.  Therefore, the value is one
+   variable-length integer: the role of the Original Publisher of the
+   Object.  The role ranges from 0 to 127.  A value of 0 identifies the
+   main publisher.  A higher value identifies a backup publisher.  The
+   operator sets the role of each Original Publisher.  An Original
+   Publisher MAY set a different role on a specific Group.  For example,
+   an Original Publisher sets a higher role on a Group that it knows to
+   contain encoding artifacts.  An Original Publisher MUST use the same
+   role in every Object of a Group.
+
+   An Original Publisher with a role SHOULD include PUBLISHER_ROLE in
+   every Object of the Track with status Normal.  A relay considers an
+   Object without PUBLISHER_ROLE, or with a value higher than 127, as an
+   Object with role 127.  A relay forwards and caches the property
+   unchanged, as [MOQT] requires for Object Properties.  Therefore, a
+   relay at any hop learns the role of the Original Publisher of each
+   Object it receives, including the Objects of a FETCH response.
+   Section 8.2 describes how a relay uses the role.
+
 7.  Setup Option
 
-   REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD3) declares that
+   REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD4) declares that
    an endpoint supports this document.  The Option Type is odd.  The
    value has a length of 0.  The presence of the option declares
    support, as the Extension Negotiation section of [MOQT] allows.  The
@@ -303,7 +303,7 @@ Table of Contents
 
    An endpoint advertising the option supports the REDUNDANT_PUBLISHERS
    Track Property (Section 4).  A relay advertising the option MUST
-   follow Section 8, including the use of PUBLISHER_ROLE (Section 5).
+   follow Section 8, including the use of PUBLISHER_ROLE (Section 6).
 
    The Setup Option tells a publisher whether a subscriber supports
    REDUNDANT_PUBLISHERS.  On a session without the negotiated extension,
@@ -347,7 +347,7 @@ Table of Contents
    A relay SHOULD bind a Group when the Selection Timeout expires.  The
    timeout starts when the relay receives the first Object of the Group
    from any source.  The role of a source for the Group is the role in
-   the first Object of the Group received from that source (Section 5).
+   the first Object of the Group received from that source (Section 6).
    The relay binds the Group to the source with the lowest role.  When
    several sources have the lowest role, the relay binds the Group to
    the source whose first Object of the Group arrived earliest.  When
@@ -453,7 +453,7 @@ Table of Contents
    the binding ends, so that it binds the Group to the same source
    again.
 
-   The tag (Section 6) protects a Group after a binding ends upstream.
+   The tag (Section 5) protects a Group after a binding ends upstream.
    All Objects of a Group that a relay holds carry the same tag, because
    they come from one Original Publisher.  A relay SHOULD compare the
    tag of each Object that it receives from the source of a Group with
@@ -526,7 +526,7 @@ Table of Contents
    subscriber MUST advertise the Setup Option (Section 7).  It ignores
    the Selection Timeout and PUBLISHER_ROLE.  It handles a truncated
    Group as it handles any Group whose Subgroup streams were reset.  It
-   MAY compare the tags of the Objects of a Group (Section 6) to detect
+   MAY compare the tags of the Objects of a Group (Section 5) to detect
    a Group that mixes two copies.
 
    These two requirements let player implementations add support before
@@ -617,7 +617,7 @@ Table of Contents
    each publisher.  Verification within a Group still works, because no
    Group is ever mixed.
 
-   The tag (Section 6) is not a credential.  An authorized Original
+   The tag (Section 5) is not a credential.  An authorized Original
    Publisher can send the tag of another Original Publisher.  A relay
    cannot detect the copied tag.  A Group can then mix two copies.  The
    tag protects a Group against the loss of a binding (Section 8.4).  It
@@ -632,34 +632,37 @@ Table of Contents
 
 10.  IANA Considerations
 
-   This document registers four codepoints in the registries of [MOQT].
+   This document registers five codepoints in the registries of [MOQT].
 
-   This document registers two entries in the "MOQ Properties" registry:
+   This document registers three entries in the "MOQ Properties"
+   registry:
 
          +======+======================+========+===============+
          | Type | Name                 | Scope  | Specification |
          +======+======================+========+===============+
          | TBD1 | REDUNDANT_PUBLISHERS | Track  | Section 4     |
          +------+----------------------+--------+---------------+
-         | TBD2 | PUBLISHER_ROLE       | Object | Section 5     |
+         | TBD2 | PUBLISHER_TAG        | Object | Section 5     |
+         +------+----------------------+--------+---------------+
+         | TBD3 | PUBLISHER_ROLE       | Object | Section 6     |
          +------+----------------------+--------+---------------+
 
                                  Table 1
 
    TBD1 is an even value in the range of Mandatory Track Properties,
-   0x4000 to 0x7FFF.  TBD2 is an even value.
+   0x4000 to 0x7FFF.  TBD2 and TBD3 are even values outside that range.
 
    This document registers one entry in the "Setup Options" registry:
 
          +======+================================+===============+
          | Type | Name                           | Specification |
          +======+================================+===============+
-         | TBD3 | REDUNDANT_PUBLISHERS_SUPPORTED | Section 7     |
+         | TBD4 | REDUNDANT_PUBLISHERS_SUPPORTED | Section 7     |
          +------+--------------------------------+---------------+
 
                                   Table 2
 
-   TBD3 is an odd value.
+   TBD4 is an odd value.
 
    This document registers one entry in the "REQUEST_ERROR Codes"
    registry:
@@ -667,7 +670,7 @@ Table of Contents
             +=========================+======+===============+
             | Name                    | Code | Specification |
             +=========================+======+===============+
-            | TRACK_PROPERTY_MISMATCH | TBD4 | Section 8.3   |
+            | TRACK_PROPERTY_MISMATCH | TBD5 | Section 8.3   |
             +-------------------------+------+---------------+
 
                                  Table 3
