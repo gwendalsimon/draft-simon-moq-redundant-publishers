@@ -245,21 +245,22 @@ Publisher of each Object it receives, including the Objects of a FETCH response.
 
 # Setup Option {#setup-option}
 
-REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD4) declares that an endpoint
-supports this document. The Option Type is odd. The value has a length of 0. The
-presence of the option declares support, as the Extension Negotiation section of
-{{MOQT}} allows. The extension is negotiated on a session when both endpoints
-include the option in SETUP.
+REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD4) declares that an
+endpoint supports this document. The Option Type is odd. The value has a length
+of 0. The presence of the option declares support, as the Extension Negotiation
+section of {{MOQT}} allows. The extension is negotiated on a session when both
+endpoints include the option in SETUP.
 
 An endpoint advertising the option supports the REDUNDANT_PUBLISHERS Track
 Property ({{redundant-publishers}}). A relay advertising the option MUST follow
-{{relay-behavior}}, including the use of PUBLISHER_ROLE ({{publisher-role}}).
+{{relay-behavior}}, including the use of PUBLISHER_TAG ({{publisher-tag}}) and
+PUBLISHER_ROLE ({{publisher-role}}).
 
 The Setup Option tells a publisher whether a subscriber supports
 REDUNDANT_PUBLISHERS. On a session without the negotiated extension, a publisher
-MUST reject a SUBSCRIBE or a FETCH for a Track with REDUNDANT_PUBLISHERS with
-the error code UNSUPPORTED_EXTENSION. The publisher MUST NOT send PUBLISH for
-such a Track on that session.
+applies the rules of {{MOQT}} for a subscriber that does not support a Mandatory
+Track Property. A subscriber that receives the Track without support refuses it
+under the same rules.
 
 This extension applies to the version of MOQT that {{MOQT}} defines.
 
