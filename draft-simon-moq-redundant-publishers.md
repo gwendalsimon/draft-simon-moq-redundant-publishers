@@ -53,21 +53,86 @@ informative:
 
 --- abstract
 
-TODO: Abstract, written once the plan is agreed.
+Live streaming services run redundant encoders. The copies of a Track from two
+encoders are interchangeable, but they can differ in bytes. Media over QUIC
+Transport (MOQT) treats two different Objects at the same Location as a
+malformed Track. Therefore, a relay that receives both copies ends the Track.
+This document defines REDUNDANT_PUBLISHERS, a Mandatory Track Property by which
+the Original Publishers of a Track declare that their copies can differ. A relay
+that supports the property delivers each Group from one Original Publisher and
+continues the Track when one Original Publisher fails. Every Object carries
+PUBLISHER_TAG, an Object Property that identifies its Original Publisher. A
+relay uses the tag to keep each Group from one Original Publisher across several
+hops. An optional Object Property, PUBLISHER_ROLE, lets a relay prefer a main
+publisher.
 
 --- middle
 
 # Introduction
 
-TODO
+Live streaming services run redundant encoders, so that the failure of one
+encoder does not interrupt the stream. For segmented media, REaP {{REAP}}
+gives the same name to the segments that redundant encoders produce for the
+same media. A packager or an origin can then take each segment from any
+encoder without the player noticing. The segments are interchangeable, but
+there is no guarantee that they are byte-identical.
+
+Interchangeable segments still produce glitches when a player receives them
+mixed. Netflix reports audio and video glitches when its origin mixes segments
+from two pipelines {{NETFLIX-MHV26}}. Therefore, its origin prefers one
+pipeline and switches to another pipeline only at a segment boundary, when the
+preferred pipeline fails.
+
+MOQT {{MOQT}} binds each Location of a Track to one Object. A relay that
+receives two Objects at the same Location with different Payloads considers
+the Track malformed (the Malformed Tracks section of {{MOQT}}). The relay then
+terminates its downstream subscriptions. In a deployment with redundant
+encoders, the two copies of a Track can break that rule wherever they differ.
+Therefore, the redundancy that is meant to keep the Track alive can end it at
+the first relay that receives both copies.
+
+This document defines REDUNDANT_PUBLISHERS, a Mandatory Track Property by
+which the Original Publishers of a Track declare that their copies can differ.
+A relay that supports the property delivers each Group from one Original
+Publisher. No Group mixes two copies. The Track continues when one Original
+Publisher fails. An optional Object Property, PUBLISHER_ROLE, lets a relay
+prefer a main publisher, as the Netflix origin prefers one pipeline. Under the
+rules for Mandatory Track Properties in {{MOQT}}, a relay that does not
+support the property does not carry the Track.
+
+This document assumes that the Original Publishers of a Track use the same
+Group ID for the same media, with aligned Group boundaries. How the encoders
+align their output is out of scope. REaP {{REAP}} is one method.
 
 # Conventions and Definitions
 
 {::boilerplate bcp14-tagged}
 
-TODO
+This document uses the terms Track, Group, Subgroup, Object, Location, Original
+Publisher, Track Property, Object Property, Mandatory Track Property, and Setup
+Option as defined in {{MOQT}}.
 
-The relay behavior in {{relay-behavior}} uses the following terms:
+This document also uses the following terms:
+
+Tag:
+: A number that an Original Publisher builds when it starts and includes in
+  every Object it publishes ({{publisher-tag}}). Two Objects with the same tag
+  come from the same Original Publisher, with no restart between them.
+
+Role:
+: The preference value that an Original Publisher carries in each Object
+  ({{publisher-role}}). A relay prefers a lower role.
+
+Main publisher:
+: The Original Publisher to which the operator gives role 0.
+
+Backup publisher:
+: An Original Publisher to which the operator gives a role higher than 0.
+
+Selection Timeout:
+: The maximum time a relay waits, after the first Object of a Group arrives,
+  before it chooses the source of the Group ({{source-selection}}). The
+  REDUNDANT_PUBLISHERS property carries it ({{redundant-publishers}}).
 
 Source:
 : An upstream session over which a relay receives the Track, through a
@@ -78,26 +143,65 @@ Binding:
 : The association of one Group of the Track with one source. A relay delivers
   a bound Group only from that source ({{sources-and-bindings}}).
 
-Tag:
-: A number that an Original Publisher builds when it starts and includes in
-  every Object it publishes ({{publisher-tag}}). Two Objects with the same tag
-  come from the same Original Publisher, with no restart between them.
-
 Truncated Group:
 : A Group whose source ended before delivering all of it
   ({{truncated-groups}}).
 
+# Overview {#overview}
+
+Two or more Original Publishers publish the same Track and set the
+REDUNDANT_PUBLISHERS Track Property ({{redundant-publishers}}). The property
+carries a Selection Timeout. Each Original Publisher includes its tag in every
+Object ({{publisher-tag}}). An operator can also give each Original Publisher a
+role ({{publisher-role}}): one main publisher and one or more backup publishers,
+in order of preference. Each Object then carries the role of its Original
+Publisher.
+
+A relay delivers each Group of the Track from one source. The relay waits for
+the Selection Timeout after the first Object of a Group arrives. It then chooses
+the source that delivered the lowest role. Among sources with the same role, it
+chooses the earliest. An Object without a role counts as the highest role. The
+relay discards the copies of the Group received from other sources
+({{relay-behavior}}).
+
+A source can fail while it delivers a Group. The relay does not complete the
+Group from another source, because the result would mix two copies. The relay
+truncates the Group and delivers the next Group from another source.
+Therefore, the subscribers lose at most the end of one Group. A relay that
+receives an Object whose tag differs from the tag of the Group that it holds
+discards the Object and truncates the Group.
+
+A Setup Option ({{setup-option}}) declares support for the property. Under the
+rules for Mandatory Track Properties in {{MOQT}}, an endpoint without support
+for the property does not carry the Track. A player receiving the Track over
+one session needs no new behavior beyond recognizing the property and
+advertising the Setup Option ({{plain-subscribers}}).
+
 # REDUNDANT_PUBLISHERS {#redundant-publishers}
 
-TODO
+REDUNDANT_PUBLISHERS (Property Type TBD1) is a Mandatory Track Property
+({{MOQT}}). With this property, an Original Publisher declares that other
+Original Publishers can publish the same Track. Their copies of a Group MAY
+differ.
 
-# PUBLISHER_ROLE {#publisher-role}
+The Property Type is even. Therefore, the value is one variable-length integer:
+the Selection Timeout, in milliseconds. A value of 0 means that a relay does not
+wait. The relay then binds each Group to the first source to deliver an Object
+of the Group. Original Publishers without a role SHOULD set the Selection
+Timeout to 0.
 
-TODO
+Every Original Publisher of the Track MUST include REDUNDANT_PUBLISHERS in its
+Track Properties. All Original Publishers of the Track MUST send the same
+Track Properties, including the same Selection Timeout. A relay rejects a
+source with different Track Properties ({{forwarding-and-caching}}).
+
+{{MOQT}} defines how an endpoint without support for a Mandatory Track
+Property handles the Track. A relay supporting REDUNDANT_PUBLISHERS follows
+{{relay-behavior}} and forwards the property unchanged.
 
 # PUBLISHER_TAG {#publisher-tag}
 
-PUBLISHER_TAG (Property Type TBD) is an Object Property ({{MOQT}}). The
+PUBLISHER_TAG (Property Type TBD2) is an Object Property ({{MOQT}}). The
 Property Type is even. Therefore, the value is one variable-length integer:
 the tag of the Original Publisher of the Object. The Property Type is outside
 the range that {{MOQT}} reserves for Mandatory Track Properties.
@@ -119,9 +223,46 @@ that delivers an Object with status Normal and without PUBLISHER_TAG as a
 failed source ({{failed-sources}}). {{filling-and-fetch}} defines how a relay
 uses the tag.
 
+# PUBLISHER_ROLE {#publisher-role}
+
+PUBLISHER_ROLE (Property Type TBD3) is an optional Object Property ({{MOQT}}).
+The Property Type is even. Therefore, the value is one variable-length integer:
+the role of the Original Publisher of the Object. The role ranges from 0 to 127.
+A value of 0 identifies the main publisher. A higher value identifies a backup
+publisher. The operator sets the role of each Original Publisher. An Original
+Publisher MAY set a different role on a specific Group. For example, an Original
+Publisher sets a higher role on a Group that it knows to contain encoding
+artifacts. An Original Publisher MUST use the same role in every Object of a
+Group.
+
+An Original Publisher with a role SHOULD include PUBLISHER_ROLE in every Object
+of the Track with status Normal. A relay considers an Object without
+PUBLISHER_ROLE, or with a value higher than 127, as an Object with role 127. A
+relay forwards and caches the property unchanged, as {{MOQT}} requires for
+Object Properties. Therefore, a relay at any hop learns the role of the Original
+Publisher of each Object it receives, including the Objects of a FETCH response.
+{{source-selection}} describes how a relay uses the role.
+
 # Setup Option {#setup-option}
 
-TODO
+REDUNDANT_PUBLISHERS_SUPPORTED (Setup Option Type TBD4) declares that an
+endpoint supports this document. The Option Type is odd. The value has a length
+of 0. The presence of the option declares support, as the Extension Negotiation
+section of {{MOQT}} allows. The extension is negotiated on a session when both
+endpoints include the option in SETUP.
+
+An endpoint advertising the option supports the REDUNDANT_PUBLISHERS Track
+Property ({{redundant-publishers}}). A relay advertising the option MUST follow
+{{relay-behavior}}, including the use of PUBLISHER_TAG ({{publisher-tag}}) and
+PUBLISHER_ROLE ({{publisher-role}}).
+
+The Setup Option tells a publisher whether a subscriber supports
+REDUNDANT_PUBLISHERS. On a session without the negotiated extension, a publisher
+applies the rules of {{MOQT}} for a subscriber that does not support a Mandatory
+Track Property. A subscriber that receives the Track without support refuses it
+under the same rules.
+
+This extension applies to the version of MOQT that {{MOQT}} defines.
 
 # Relay Behavior {#relay-behavior}
 
@@ -151,34 +292,35 @@ Original Publisher. The same holds for every copy downstream of the relay.
 
 ## Source Selection {#source-selection}
 
-A relay binds a Group when it first receives an Object of that Group from any
-source. The relay selects the source as follows:
+A relay SHOULD bind a Group when the Selection Timeout expires. The timeout
+starts when the relay receives the first Object of the Group from any source.
+The role of a source for the Group is the role in the first Object of the Group
+received from that source ({{publisher-role}}). The relay binds the Group to the
+source with the lowest role. When several sources have the lowest role, the
+relay binds the Group to the source whose first Object of the Group arrived
+earliest. When the Selection Timeout is 0, the relay binds the Group to the
+source of the first Object, without waiting.
 
-* When no source carries PUBLISHER_ROLE ({{publisher-role}}), or when the
-  Selection Timeout is zero, the relay binds the Group to the first source
-  that delivers an Object of the Group.
-
-* Otherwise, the relay waits up to the Selection Timeout, measured from the
-  arrival of that first Object, for the source with the lowest PUBLISHER_ROLE
-  among the sources from which it currently receives the Track. The relay
-  binds the Group to that source if that source delivers an Object of the
-  Group in time. Otherwise, the relay binds the Group to the lowest-role
-  source that has delivered an Object of the Group.
+A relay MAY bind a Group before the Selection Timeout expires, on a local
+decision.
 
 While it waits, the relay holds the Objects of the Group from every source and
 forwards none of them. The wait adds at most the Selection Timeout to the
-latency of a Group. The wait occurs only when the preferred source is late. A
-relay MAY bound the Objects that it holds during the wait. A source whose held
-Objects the relay dropped is not eligible for that Group. A relay that bounds
-the Objects it holds keeps the Selection Timeout unchanged.
+latency of a Group. A relay MAY bound the Objects that it holds during the wait.
+A source whose held Objects the relay dropped is not eligible for that Group. A
+relay that bounds the Objects it holds keeps the Selection Timeout unchanged.
 {{relay-security}} describes a local cap on the timeout and its cost.
 
 A relay subscribes to every publisher of the Track that it discovers, as
 {{MOQT}} requires of a relay. A relay MAY limit the number of sources that it
 holds, with the means that {{MOQT}} gives a relay for additional publishers.
-The relay SHOULD keep the sources with the lowest PUBLISHER_ROLE. A relay
+The relay SHOULD keep the sources with the lowest role. A relay
 cannot select a source that it does not hold. It can fail over to that source
 only after it subscribes to the source and waits for a Group boundary.
+
+Open issue: a relay selects a source per Track. Therefore, a relay can deliver
+Tracks of one broadcast from different Original Publishers. See
+https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/14.
 
 ## Forwarding and Caching {#forwarding-and-caching}
 
@@ -233,13 +375,13 @@ subscription. The relay MUST NOT request those Objects from another source,
 even when the source of the Group is no longer available.
 
 A FETCH for a Group that the relay has not bound binds that Group. The relay
-chooses one source for the Group and requests the Group from that source.
-When roles are present, the relay prefers the source with the lowest
-PUBLISHER_ROLE. A FETCH that spans more than one Group can bind different
-Groups to different sources. It binds each Group to one source only. For
-example, suppose the source of an upstream FETCH for Groups 1 through 5 fails
-while delivering Group 3. Groups 1 and 2 stay bound to that source. Group 3 is
-truncated. The relay can request Groups 4 and 5 from another source.
+chooses one source for the Group and requests the Group from that source. The
+relay prefers the source whose most recent Object carried the lowest role. A
+FETCH that spans more than one Group can bind different Groups to different
+sources. It binds each Group to one source only. For example, suppose the source
+of an upstream FETCH for Groups 1 through 5 fails while delivering Group 3.
+Groups 1 and 2 stay bound to that source. Group 3 is truncated. The relay can
+request Groups 4 and 5 from another source.
 
 A relay keeps the binding of a Group while it holds any Object or Object state
 of the Group. Once the relay holds none, the binding ends. A later request MAY
@@ -260,6 +402,13 @@ carries that property. When the Track does not carry it, a relay MUST NOT keep
 a Gone state of the Track longer than it keeps the Objects of the Track. Once
 the Objects and the Gone state of a Group expire, a later request can bind the
 Group again and obtain a complete copy.
+
+Open issue: a relay that holds part of a Group can request the rest from an
+upstream relay whose binding of the Group has ended. The tag check then
+truncates the Group. A FETCH parameter that carries the tag would let the
+upstream relay request the rest from the same Original Publisher. The same
+parameter would apply to a fill (FILL_PARAMETERS in {{MOQT}}). See
+https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/16.
 
 ## Truncated Groups {#truncated-groups}
 
@@ -367,7 +516,14 @@ A publisher SHOULD end the Track at a Group boundary.
 
 # Security Considerations
 
-TODO
+The security considerations of {{MOQT}} apply. This document adds four
+considerations for relays. A relay holds Objects during the Selection Timeout,
+which costs memory. A relay also no longer treats two different Objects at the
+same Location as a Malformed Track. Therefore, the relay cannot detect a
+corrupted or forged copy of a Group by comparison with another copy. The tag
+identifies an Original Publisher without authenticating it. A relay originates
+Gone for the rest of a truncated Group. {{relay-security}} describes the four
+considerations, with the effect of roles and of per-Object signatures.
 
 ## Relay Considerations {#relay-security}
 
@@ -384,7 +540,8 @@ A relay cannot tell a divergent copy of a Group from a corrupted or forged
 one. Under this property, the relay does not need to. Authorization is
 unchanged. Every source has to be authorized to publish the Track. Groups from
 any authorized source can reach subscribers, as Objects from a single
-authorized publisher can today.
+authorized publisher can today. An authorized Original Publisher can set role 0
+and win every selection. The role expresses a preference, not a credential.
 
 Copies of a Group from different Original Publishers differ. Per-Object
 signatures, for example in Immutable Properties ({{MOQT}}), therefore differ
@@ -406,7 +563,32 @@ covers at most the rest of one Group. Every Gone state of the Track expires as
 
 # IANA Considerations
 
-TODO
+This document registers five codepoints in the registries of {{MOQT}}.
+
+This document registers three entries in the "MOQ Properties" registry:
+
+| Type | Name                 | Scope  | Specification            |
+|-----:|:---------------------|:-------|:-------------------------|
+| TBD1 | REDUNDANT_PUBLISHERS | Track  | {{redundant-publishers}} |
+| TBD2 | PUBLISHER_TAG        | Object | {{publisher-tag}}        |
+| TBD3 | PUBLISHER_ROLE       | Object | {{publisher-role}}       |
+
+TBD1 is an even value in the range of Mandatory Track Properties, 0x4000 to
+0x7FFF. TBD2 and TBD3 are even values outside that range.
+
+This document registers one entry in the "Setup Options" registry:
+
+| Type | Name                           | Specification    |
+|-----:|:-------------------------------|:-----------------|
+| TBD4 | REDUNDANT_PUBLISHERS_SUPPORTED | {{setup-option}} |
+
+TBD4 is an odd value.
+
+This document registers one entry in the "REQUEST_ERROR Codes" registry:
+
+| Name                    | Code | Specification              |
+|:------------------------|:----:|:---------------------------|
+| TRACK_PROPERTY_MISMATCH | TBD5 | {{forwarding-and-caching}} |
 
 --- back
 
