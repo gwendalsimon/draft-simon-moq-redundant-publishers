@@ -1624,6 +1624,12 @@ carries that property. When the Track does not carry it, a relay <span class="bc
 a Gone state of the Track longer than it keeps the Objects of the Track. Once
 the Objects and the Gone state of a Group expire, a later request can bind the
 Group again and obtain a complete copy.<a href="#section-8.4-5" class="pilcrow">¶</a></p>
+<p id="section-8.4-6">Open issue: a relay that holds part of a Group can request the rest from an
+upstream relay whose binding of the Group has ended. The tag check then
+truncates the Group. A FETCH parameter that carries the tag would let the
+upstream relay request the rest from the same Original Publisher. The same
+parameter would apply to a fill (FILL_PARAMETERS in <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>). See
+https://github.com/gwendalsimon/draft-simon-moq-redundant-publishers/issues/16.<a href="#section-8.4-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="truncated-groups">
