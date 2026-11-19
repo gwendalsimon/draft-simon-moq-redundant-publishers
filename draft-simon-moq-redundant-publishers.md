@@ -516,12 +516,14 @@ A publisher SHOULD end the Track at a Group boundary.
 
 # Security Considerations
 
-The security considerations of {{MOQT}} apply. This document adds two
-considerations for relays. A relay holds Objects during the Selection Timeout, which costs
-memory. A relay also no longer treats two different Objects at the same Location
-as a Malformed Track. Therefore, the relay cannot detect a corrupted or forged
-copy of a Group by comparison with another copy. {{relay-security}} describes
-both considerations, with the effect of roles and of per-Object signatures.
+The security considerations of {{MOQT}} apply. This document adds four
+considerations for relays. A relay holds Objects during the Selection Timeout,
+which costs memory. A relay also no longer treats two different Objects at the
+same Location as a Malformed Track. Therefore, the relay cannot detect a
+corrupted or forged copy of a Group by comparison with another copy. The tag
+identifies an Original Publisher without authenticating it. A relay originates
+Gone for the rest of a truncated Group. {{relay-security}} describes the four
+considerations, with the effect of roles and of per-Object signatures.
 
 ## Relay Considerations {#relay-security}
 
